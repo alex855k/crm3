@@ -1,0 +1,75 @@
+﻿/*style from smart admin em to apply on HTML.ValidationMessage*/
+
+.validation {
+    display: block;
+    margin-top: 6px;
+    padding: 0 1px;
+    font-style: normal;
+    font-size: 11px;
+    line-height: 15px;
+    color: #d56161;
+}
+
+.fileUploadButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.procedureWrapper {
+    width: 50%;
+    min-height: 10px;
+    float: left;
+    margin-left: 25%;
+    margin-right: 25%;
+}
+
+.procedure {
+    width: 100%;
+    min-height: 50px;
+    float: left;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.procedure h1 {
+    margin: 0px 0px 0px 0px;
+    padding: 0px;
+    float: left;
+}
+
+.procedure img {
+    float: left; 
+    margin-left: 25%;
+}
+
+.procedureItem {
+    width: 100%;
+    min-height: 100px;
+    float: left;
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+}
+
+.procedureItem:not(:last-of-type) {
+    border-bottom: solid 1px #EEE;
+}
+
+.js-sendtoemailbox {
+    width: 100%;
+    min-height: 100px;
+    float: left;
+    position: relative;
+    z-index: 3;
+    padding: 5px;
+    box-sizing: border-box;
+    border: solid 1px #000;
+    background-color: #FFF;
+    display: none;
+}

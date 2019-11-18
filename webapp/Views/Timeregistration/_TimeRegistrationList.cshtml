@@ -1,0 +1,334 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using Microsoft.AspNet.Identity
+@using CRM.Application.Core.Resources.TimeRegistrations
+@{
+    Layout = null;
+}
+<input type="hidden" id="hiddenUserId" name="hiddenUserId" value="@User.Identity.GetUserId()">
+
+<table id="timeRegTable" class="projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+    <thead>
+        <tr style="width: 100%">
+            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@TimeReg.Start @TimeReg.Date</th>
+            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@TimeReg.End @TimeReg.Date</th>
+            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@TimeReg.Interval</th>
+            <th rowspan="1" colspan="1"><button data-caseId="" id="timeregTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>
+        </tr>
+    </thead>
+    <tbody id="timeRegTBody"></tbody>
+</table>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<script type="text/javascript">
+
+    $(document).off("click", ".TimeReg");
+    $(document).on("click", ".TimeReg", function() {
+        const tr = $(this).parent()[0];
+        const id = $(tr).attr("data-caseid");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#timeReg${id}`).show();
+        } else {
+            $(`#timeReg${id}`).hide();
+        }
+    });
+
+    function clearTimeRegList() {
+        $("#timeRegTBody").empty();
+    }
+    //Makes it so a user can edit a timereg
+    $(document).off("click", ".editTimeRegBtn");
+    $(document).on("click", ".editTimeRegBtn", function () {
+        var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+        var $el = $(`[data-editable-${timeRegId}]`);
+        $(this).replaceWith(
+            `<button id="${timeRegId}-saveTimeRegBtn" style="margin-right: 10px" data-timeReg-id="${timeRegId
+            }" class="btn btn-xs editSaveTimeRegBtn btn-success pull-left">@TimeReg.Save</button>
+                <button id="${timeRegId}-cancelTimeRegBtn" data-timeReg-id="${timeRegId}" style="margin-right: 10px" class="btn btn-xs cancelTimeRegBtn btn-normal pull-left">@TimeReg.Cancel</button>`);
+        $.each($el,
+            function (i, item) {
+                const $width = $($el[i]).width();
+                const $id = $($el[i]).prop("id");
+                if ($id === `${timeRegId}-assignment`) {
+                    $(item).attr(`data-saveable-${timeRegId}`, "");
+                    $(item).removeAttr(`data-editable-${timeRegId}`);
+                    const content = $("#timeRegAssignment").clone();
+                    $(`#${timeRegId}-assignment`).empty();
+                    $(`#${timeRegId}-assignment`).append(content);
+                } else {
+                    const $td = $(`<td style='width: ${$width}px'> </td>`);
+                    const $input =
+                        $(`<input class="form-control datepicker" id="${$id}" data-saveable-${timeRegId} style="width:${$width
+                            }px"/>`).val($(item).text());
+
+                    $($td).append($input);
+                    $(item).replaceWith($td);
+                }
+            });
+        $(`#timeregDateTime-start-${timeRegId}`).datetimepicker({
+            locale: "@TimeReg.locale",
+            sideBySide: true
+        });
+
+        $(`#timeregDateTime-end-${timeRegId}`).datetimepicker({
+            locale: "@TimeReg.locale",
+            sideBySide: true,
+        });
+
+        $(`#timeregDateTime-end-${timeRegId}`).on("dp.change",
+            function (e) {
+
+                $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").maxDate(e.date);
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date()
+                    .toISOString();
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${timeRegId}-interval`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@TimeReg.shortHour}]:mm[@{@TimeReg.shortMin}]"));
+            });
+
+        $(`#timeregDateTime-start-${timeRegId}`).on("dp.change",
+            function(e) {
+                $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").minDate(e.date);
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date()
+                    ;
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${timeRegId}-interval`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@TimeReg.shortHour}]:mm[@{@TimeReg.shortMin}]"));
+            });
+    });
+
+
+    // Deletes a timereg
+    $(document).off("click", ".deleteTimeRegBtn");
+    $(document).on("click", ".deleteTimeRegBtn",
+        function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var caseId = $("#TimeRegModal").attr("data-caseId");
+            var oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+            $.SmartMessageBox({
+                    title: "@TimeReg.Delete?",
+                    content: "@TimeReg.RUSure @TimeReg.TimeRegistration?",
+                    buttons: "[@TimeReg.No][@TimeReg.Yes]"
+                },
+                function(ButtonPressed) {
+                    if (ButtonPressed === "@TimeReg.Yes") {
+
+                        $.ajax({
+                            url: "/Timeregistration/DeleteTimeReg",
+                            data: { timeRegId: timeRegId },
+                            success: function(data) {
+                                $(`.TimeRegRemove${timeRegId}`).fadeOut(300, function() { $(this).remove(); });
+
+                                const newTimeEstimate =
+                                    oldTimeEstimate.subtract(moment.duration($(`#${timeRegId}-interval`).text()));
+                                $(`#${caseId}-TotalTimeUsed`)
+                                    .text(`${moment.duration(newTimeEstimate).format("hh[@{@TimeReg.shortHour}]:mm[@{@TimeReg.shortMin}]", { trim: false })}`);
+                            },
+                            error: function(data) {
+                                toastr.error("Delete failed");
+
+                            }
+                        });
+                    }
+                    if (ButtonPressed === "@TimeReg.No") {
+                        $.smallBox({
+                            iconSmall: "fa fa-times fa-2x fadeInRight animated",
+                            timeout: 4000
+                        });
+                    }
+                }
+            );
+
+        });
+
+    $(document).off("click", "#timeregTableReload");
+    $(document).on("click",
+        "#timeregTableReload",
+        function() {
+            getTimeRegtable($("#hiddenUserId").val());
+        });
+
+    $(document).ready(function() {
+
+        getTimeRegtable($("#hiddenUserId").val());
+
+    });
+
+    function getTimeRegtable(userId) {
+        $("#timeRegTBody").empty();
+        $.ajax({
+            url: "/Timeregistration/GetCaseTimeRegs",
+            data: { 'UserId': userId, 'dateTime': $("#dailyReportDate").attr("data-date") },
+            dataType: "json",
+            success: function(data) {
+                insertTimeregToTable(data);
+            },
+            error: function() {
+                toastr.error("Could not fetch Time Registration");
+            }
+
+        });
+    }
+    
+    function insertTimeregToTable(data) {
+        $.each(data.TimeRegsList,
+            function (i, item) {
+                var endDate = "-";
+                if (item.EndDateTime != null) {
+                    endDate = moment(new Date(parseInt((item.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1"))))
+                        .format("DD.MM.YYYY HH:mm");
+                }
+                var caseTimeRegString ="";
+                var assignmentString="";
+
+                if (item.CustomerCase != null) {
+                    caseTimeRegString = `<tr>
+                                                <td>@Customer.CaseTitle:</td><td style="max-width:150px; word-wrap:break-word" id="timeregCaseTitle-${
+                        item.Id}" data-editable-${item.Id}>${item.CustomerCase.Titel}</td>
+                                            </tr>`;
+                }
+                if (item.CaseAssignment != null) {
+                    assignmentString = `<tr>
+                                                <td>@Customer.Assignment @Customer.Title:</td><td style="max-width:150px; word-wrap:break-word" id="timeregAssigment-${
+                        item.Id}" data-editable-${item.Id}>${item.CaseAssignment.Title}</td>
+                                            </tr>`;
+                }
+
+                $("#timeRegTable").append(
+                    `<tr data-caseid="${item.Id}" @*role="row"*@ class="TimeRegRemove${item.Id} even expandCollapseDetails">
+                                <td id="timeregDateTime-start-${item.Id}" data-editable-${item.Id}>${moment(
+                        new Date(parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                <td id="timeregDateTime-end-${item.Id}" data-editable-${item.Id}>${endDate}</td>
+                                <td id="${item.Id}-interval">${moment.duration(item.Interval).format("H[@{@TimeReg.shortHour}]:mm[@{@TimeReg.shortMin}]", { trim: false })}</td>
+                                <td style="width: 15px" class="details-control TimeReg"></td>
+
+                                <tr class="TimeReg TimeRegRemove${item.Id}" id="timeReg${item.Id}" style="display: none"><td colspan="6">
+                                    <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                        <tbody>
+                                    ${caseTimeRegString}
+                                    ${assignmentString}
+                                            <tr>
+                                                <td>@TimeReg.Description:</td><td style="max-width:150px; word-wrap:break-word" id="timeregDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                            </tr>
+                                            <tr>
+                                                <td id="${item.Id}-actions">
+                                                    <button id="${item.Id}-editTimeRegBtn" style="margin-right: 10px" data-timeReg-id="${item.Id}" class="btn btn-xs editTimeRegBtn btn-info pull-left">@TimeReg.Edit</button>
+                                                    <button id="${item.Id}-DeleteBtn" data-timeReg-id="${item.Id}" class="btn btn-xs deleteTimeRegBtn btn-danger pull-left">@TimeReg.Delete</button>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    </td>
+                                </tr>
+                            </tr>`);
+            });
+    }
+
+    //returns the timereg to normal
+        $(document).off("click", ".cancelTimeRegBtn");
+        $(document).on("click", ".cancelTimeRegBtn",
+            function() {
+                var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+                var $el = $(`[data-saveable-${timeRegId}]`);
+                $(this).replaceWith(
+                    `<button id="${timeRegId}-editTimeRegBtn" data-timeReg-id="${timeRegId
+                    }" class="btn btn-xs editTimeRegBtn btn-info pull-left">@TimeReg.Edit</button> `);
+                $(`#${timeRegId}-saveTimeRegBtn`).remove();
+
+                $.each($el,
+                    function(i, item) {
+                        const $id = $($el[i]).prop("id");
+                        if ($id === `${timeRegId}-assignment`) {
+                            const selected = $(item).children().find(":selected").text();
+                            $(`#${timeRegId}-assignment`).empty();
+                            $(`#${timeRegId}-assignment`).append(selected);
+                            $(item).attr(`data-editable-${timeRegId}`, "");
+                            $(item).removeAttr(`data-saveable-${timeRegId}`);
+
+                        } else {
+
+                            const $td = $(`<td data-editable-${timeRegId} id=${$id}>${$(item).val()} </td>`);
+
+                            $(item).parent().replaceWith($td);
+                        }
+
+                    });
+                $.ajax({
+                    url: "/Timeregistration/GetTimeReg",
+                    type: "Get",
+                    data: { "TimeRegId": timeRegId },
+                    success: function (data) {
+                        //$(`#timeregTitle-${timeRegId}`).text(data.Title);
+                        const timeStart = new Date(parseInt((data.TimeReg.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                        const timeEnd = new Date(parseInt((data.TimeReg.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                        $(`#timeregDateTime-start-${timeRegId}`).text(
+                            moment(timeStart)
+                            .format("DD.MM.YYYY HH:mm"));
+                        $(`#timeregDateTime-end-${timeRegId}`)
+                            .text(moment(timeEnd)
+                                .format("DD.MM.YYYY HH:mm"));
+
+                        $(`#${timeRegId}-interval`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@TimeReg.shortHour}]:mm[@{@TimeReg.shortMin}]"));
+
+                        //$(`#${timeRegId}-assignment`).text(data.CaseAssignment.Title);
+                        $(`#timeregDescription-${timeRegId}`).text(data.Description);
+                    },
+                    error: function(data) {
+                        toastr.error("Error");
+                    }
+                });
+            });
+
+        //Saves the edited timereg
+        $(document).off("click", ".editSaveTimeRegBtn");
+        $(document).on("click", ".editSaveTimeRegBtn",
+            function() {
+                var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+                var $el = $(`[data-saveable-${timeRegId}]`);
+                $(this).replaceWith(`<button id="${timeRegId}-editTimeRegBtn" data-timeReg-id="${timeRegId
+                    }" class="btn btn-xs editTimeRegBtn btn-info pull-left">@TimeReg.Edit</button> `);
+                $(`#${timeRegId}-cancelTimeRegBtn`).remove();
+
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                const assignmentId = $(`#${timeRegId}-assignment`).children().find(":selected").val();
+                $(`#${timeRegId}-interval`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@TimeReg.shortHour}]:mm[@{@TimeReg.shortMin}]"));
+                $.each($el,
+                    function(i, item) {
+                        const $id = $($el[i]).prop("id");
+                        if ($id === `${timeRegId}-assignment`) {
+                            const selected = $(item).children().find(":selected").text();
+                            $(`#${timeRegId}-assignment`).empty();
+                            $(`#${timeRegId}-assignment`).append(selected);
+                            $(item).attr(`data-editable-${timeRegId}`, "");
+                            $(item).removeAttr(`data-saveable-${timeRegId}`);
+                        } else {
+                            const $td = $(`<td data-editable-${timeRegId} id=${$id}>${$(item).val()} </td>`);
+
+                            $(item).parent().replaceWith($td);
+                        }
+                    });
+
+                const timeReg = {
+                    "Id": timeRegId,
+                    "Description": $(`#timeregDescription-${timeRegId}`).text(),
+                    "StartDateTime": timeStart,
+                    "EndDateTime": timeEnd,
+                };
+                $.ajax({
+                    url: "/Timeregistration/TimeRegEdit",
+                    type: "Post",
+                    data: { "timeReg": timeReg },
+                    success: function(data) {
+                        toastr.success("@TimeReg.Saved");
+                    },
+                    error: function(data) {
+                        toastr.error("Edit failed");
+
+                    }
+                });
+
+            });
+
+</script>

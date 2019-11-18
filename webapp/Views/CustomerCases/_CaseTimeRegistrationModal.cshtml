@@ -1,0 +1,92 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using CRM.Application.Core.Resources.TimeRegistrations
+@model CRM.Application.Core.ViewModels.CustomerCaseDatatableViewModel
+@{
+    Layout = null;
+}
+@Html.HiddenFor(x => x.CurrentUserID, new { id = "hiddenCurrentUserId" })
+<div class="modal-dialog modal-md">
+    <div class="modal-content" id="modalContent">
+        <div style="background: dodgerblue;" class="modal-header">
+            <button style="color: white" type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                &times;
+            </button>
+            <h4 class="modal-title" style="color: white" id="myModalLabel">@Customer.TimeRegistrations</h4>
+        </div>
+        <div class="modal-body">
+            <div class="panel-group smart-accordion-default" id="accordion-2">
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion-2" href="#collapseOne-1" aria-expanded="false" class="collapsed"> <i class="fa fa-fw fa-plus-circle txt-color-green"></i> <i class="fa fa-fw fa-minus-circle txt-color-red"></i>@TimeReg.Create</a></h4>
+                    </div>
+                    <div id="collapseOne-1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="timeRegAssignment">@Customer.Assignment</label>
+                                        <select class="form-control" id="timeRegAssignment" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="timeRegDescription">@Customer.Description</label>
+                                        <textarea class="form-control" id="timeRegDescription" placeholder="@Customer.TimeRegistration @Customer.Description" rows="5" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="timeRegEnd">@Customer.TimeRegistration @TimeReg.Start</label>
+                                    <input id="timeRegStart" placeholder="Start" class="form-control" type="text">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="timeRegEnd">@Customer.TimeRegistration @TimeReg.End</label>
+                                    <input id="timeRegEnd" placeholder="@TimeReg.TimeRegistration @Customer.Deadline" class="form-control" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">
+                                    @TimeReg.Cancel
+                                </button>
+                                <button type="button" data-loading-text="Saving..." class="btn btn-primary" id="saveTimeRegBtn">
+                                    @TimeReg.Create
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            @*<div style="max-height: 300px; padding-bottom: 15px; width:auto; overflow:auto;" >*@
+            @*<div style="padding-right:0px" class="row col-md-12">*@
+            <table id="timeRegTable" class="projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                <thead>
+                <tr style="width: 100%">
+                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@TimeReg.Start</th>
+                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@TimeReg.End</th>
+                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@Customer.Employee</th>
+                    <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@TimeReg.Interval</th>
+                    <th rowspan="1" colspan="1"><button data-caseId="" id="timeregTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>
+                </tr>
+                </thead>
+                <tbody id="timeRegTBody"></tbody>
+            </table>
+            @*</div>*@
+            @*</div>*@
+            
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<link href="~/Scripts/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/moment.min.js"></script>
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />

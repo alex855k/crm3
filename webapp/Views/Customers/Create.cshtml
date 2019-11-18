@@ -1,0 +1,197 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerViewModel
+<!-- MAIN CONTENT -->
+@Html.HiddenFor(x => x.Id, new { @id = "customerId" })
+<div id="content">
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+
+                <!-- PAGE HEADER -->
+                <i class="fa-fw fa fa-pencil-square-o"></i>
+                <a href="@Url.Action("Index","Customers", new {isCustomers = Model.CustomerStatusId == 1 ? true : false })">@CRM.Application.Core.Resources.Customers.Customer.Customers</a>
+                <span>
+                    >
+                    @if (Model.Id != 0)
+                    {
+                        @CRM.Application.Core.Resources.Customers.Customer.CustomerInfo @: :  <span style="color:#3276b1"><b>@Model.CompanyName</b></span>
+                    }
+                    else
+                    {
+                        @CRM.Application.Core.Resources.Customers.Customer.CreateCustomerForm
+                    }
+                </span>
+            </h1>
+        </div>
+        <div class="col-md-offset-11">
+            <div id="customerQuickActions" class="btn-group">
+                <a href="javascript:void(0);" data-toggle="dropdown" class="btn btn-primary btn-circle btn-lg  dropdown-toggle  "><i class="glyphicon glyphicon-list"></i></a>
+                <ul class="dropdown-menu pull-right">
+                    <li>
+                        <a id="addCustomerToDashboardList" href="javascript:void(0);">@CRM.Application.Core.Resources.Customers.Customer.AddToWatchlist</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <!-- widget grid -->
+    <section id="widget-grid" class="">
+
+
+        <!-- START ROW -->
+
+        <div class="row">
+
+            <!-- NEW COL START -->
+            <article class="col-sm-12 col-md-12 col-lg-12">
+
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget" id="wid-id-1" data-widget-sortable="false" data-widget-editbutton="false" data-widget-custombutton="false">
+                    <!-- widget options:
+                        usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                        data-widget-colorbutton="false"
+                        data-widget-editbutton="false"
+                        data-widget-togglebutton="false"
+                        data-widget-deletebutton="false"
+                        data-widget-fullscreenbutton="false"
+                        data-widget-custombutton="false"
+                        data-widget-collapsed="true"
+                        data-widget-sortable="false"
+
+                    -->
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-edit"></i> </span>
+                        <h2>@CRM.Application.Core.Resources.Customers.Customer.CreateCustomerForm  </h2>
+
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body">
+                            <ul id="customerTab" class="nav nav-tabs bordered">
+                                <li class="@(!Model.NavigateToNotes ?"active":"")">
+                                    <a href="#customerCustomer" data-toggle="tab"><i class="fa fa-user-circle-o" aria-hidden="true"></i> @CRM.Application.Core.Resources.General.General.Customer @CRM.Application.Core.Resources.General.General.Info </a>
+                                </li>
+                                @if (Model.Id != 0)
+                                {
+                                    if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerContacts", "Customers"))
+                                    {
+                                        <li id="customerContactsLi">
+                                            <a href="#customerContacts" data-toggle="tab"><i class="fa fa-address-book" aria-hidden="true"></i> @CRM.Application.Core.Resources.Customers.Customer.Contact </a>
+                                        </li>
+                                    }
+                                    if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerNotes", "Customers"))
+                                    {
+                                        <li id="customerNotesLi" class="@(Model.NavigateToNotes ?" active":"")">
+                                            <a id="customerNotesHref" href="#customerNotes" data-toggle="tab"><i class="fa fa-sticky-note" aria-hidden="true"></i> @CRM.Application.Core.Resources.Customers.Customer.Notes</a>
+                                        </li>
+                                    }
+                                    if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerAppointments", "Customers"))
+                                    {
+                                        <li id="customerAppointmentsLi">
+                                            <a href="#customerAppointments" data-toggle="tab"><i class="fa fa-sticky-note" aria-hidden="true"></i> @CRM.Application.Core.Resources.Customers.Customer.Appointments</a>
+                                        </li>
+                                    }
+
+                                    if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerCase", "Customers"))
+                                    {
+                                        <li id="customerCasesLi">
+                                            <a href="#customerCase" data-toggle="tab"><i class="fa fa-sticky-note" aria-hidden="true"></i> @CRM.Application.Core.Resources.Customers.Customer.Cases</a>
+                                        </li>
+                                    }
+                                    if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerOrderHistory", "Orders"))
+                                    {
+                                        <li id="OrdersLi">
+                                            <a href="#Orders" data-toggle="tab"><i class="fa fa-sticky-note" aria-hidden="true"></i> @CRM.Application.Core.Resources.Orders.Order.Orders</a>
+                                        </li>
+                                    }
+                                    if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("EmailMessages", "CustomerEmailCorrespondenceIndex"))
+                                    {
+                                        <li id="customerEmailCorrespondenceLi">
+                                            <a href="#customerEmailCorrespondence" data-toggle="tab"><i class="fa fa-sticky-note" aria-hidden="true"></i> @CRM.Application.Core.Resources.Email.Email.EmailMessages</a>
+                                        </li>
+                                    }
+                                }
+                                @if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerOrders", "Customers"))
+                                {
+                                    <li id="customerOrdersLi">
+                                        <a href="#customerOrders" data-toggle="tab"><i class="fa fa-sticky-note" aria-hidden="true"></i> @CRM.Application.Core.Resources.General.General.Customer @CRM.Application.Core.Resources.Orders.Order.Orders</a>
+                                    </li>
+                                }
+                            </ul>
+                            @Html.HiddenFor(x => x.Id,new{id="hiddenCurrentCustomerId"})
+                            <div id="customerTabContent" class="tab-content padding-10">
+                                <div class="tab-pane  @(!Model.NavigateToNotes ? "active fade in" : "fade")" id="customerCustomer">
+                                    @{ Html.RenderPartial("_CreateCustomer"); }
+                                </div>
+                                <div class="tab-pane fade" id="customerContacts">
+                                </div>
+                                <div class="tab-pane fade @(Model.NavigateToNotes ? "active fade in" : "fade")" id="customerNotes">
+                                    @if (Model.NavigateToNotes)
+                                    {
+                                        { Html.RenderAction("CustomerNotes", new { customerId = Model.Id }); }
+                                    }
+                                </div>
+                                <div class="tab-pane fade" id="customerAppointments">
+                                </div>
+                                <div class="tab-pane fade" id="customerCase">
+                                </div>
+                                <div class="tab-pane fade" id="customerOrders">
+                                </div>
+                                <div class="tab-pane fade" id="Orders">
+                                </div>
+                                <div class="tab-pane fade" id="customerEmailCorrespondence">
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <!-- end widget content -->
+                    </div>
+                    <!-- end widget div if>
+                    </div>
+                    <!-- end widget -->
+                    <!-- Widget ID (each widget will need unique ID)-->
+                    <div class="jarviswidget" id="wid-id-3" data-widget-editbutton="false" data-widget-custombutton="false">
+                        <!-- widget options:
+                            usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+                            data-widget-colorbutton="false"
+                            data-widget-editbutton="false"
+                            data-widget-togglebutton="false"
+                            data-widget-deletebutton="false"
+                            data-widget-fullscreenbutton="false"
+                            data-widget-custombutton="false"
+                            data-widget-collapsed="true"
+                            data-widget-sortable="false"
+                        -->
+                    </div>
+            </article>
+            <!-- END COL -->
+            <!-- NEW COL START -->
+            <!-- END COL -->
+
+        </div>
+        <!-- END ROW -->
+    </section>
+    @{Html.RenderPartial("_AddCustomerToDashboardList");}
+</div>
+
+<!-- END MAIN CONTENT -->
+<script src="~/Scripts/plugin/colorpicker/bootstrap-colorpicker.min.js"></script>
+<link href="~/Scripts/plugin/colorpicker/bootstrap-colorpicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/CRM/Customers/CreateCustomer.js"></script>
+<script src="~/Scripts/CRM/Customers/CustomerDashboard.js"></script>
+<script src="~/Scripts/CRM/General/Response.js"></script>
+<script src="~/Scripts/CRM/Enum/TransactionType.js"></script>

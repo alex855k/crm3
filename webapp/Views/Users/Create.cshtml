@@ -1,0 +1,241 @@
+﻿@using CRM.Application.Core.Resources.General
+@model CRM.Application.Core.ViewModels.UserViewModel
+<!-- MAIN CONTENT -->
+<div id="content">
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+
+                <!-- PAGE HEADER -->
+                <i class="fa-fw fa fa-pencil-square-o"></i>
+                <a href="@Url.Action("Index","Users")">@CRM.Application.Core.Resources.Administration.User.Users</a>
+                <span>
+                    >
+                    @CRM.Application.Core.Resources.Administration.User.CreateUser
+                </span>
+            </h1>
+        </div>
+    </div>
+
+
+
+    <!-- widget grid -->
+    <section id="widget-grid" class="">
+
+
+        <!-- START ROW -->
+
+        <div class="row">
+            <!-- NEW COL START -->
+            <article class="col-sm-12 col-md-12 col-lg-12">
+
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-custombutton="false">
+                    <!-- widget options:
+                        usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                        data-widget-colorbutton="false"
+                        data-widget-editbutton="false"
+                        data-widget-togglebutton="false"
+                        data-widget-deletebutton="false"
+                        data-widget-fullscreenbutton="false"
+                        data-widget-custombutton="false"
+                        data-widget-collapsed="true"
+                        data-widget-sortable="false"
+
+                    -->
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-edit"></i> </span>
+                        <h2>> @CRM.Application.Core.Resources.Administration.User.CreateUserForm</h2>
+
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+
+                            <form id="createUsersForm" method="post" class="smart-form">
+                                @Html.HiddenFor(x => x.Id,new {@id= "hiddenId" })
+                                <fieldset>
+                                    <div class="row">
+
+                                        <section class="col col-6">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.TextBoxFor(x => x.FirstName, new { @placeholder = CRM.Application.Core.Resources.Administration.User.FirstName })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.FirstName, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.TextBoxFor(x => x.LastName, new { @placeholder = CRM.Application.Core.Resources.Administration.User.LastName })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.LastName, null, new { @class = "invalid validation" })
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-6">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.TextBoxFor(x => x.Email, new { @placeholder = CRM.Application.Core.Resources.Administration.User.Email })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.Email, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-6">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.TextBoxFor(x => x.Phone, new { @placeholder = CRM.Application.Core.Resources.Administration.User.Phone })
+                                            </label>
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-4">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.TextBoxFor(x => x.UserName, new { @placeholder = CRM.Application.Core.Resources.Administration.User.UserName })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.UserName, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.PasswordFor(x => x.Password, new { @placeholder = CRM.Application.Core.Resources.Administration.User.Password })
+                                            </label>
+                                        @if( Model.Id == Guid.Empty) {@Html.ValidationMessageFor(x => x.Password, null, new { @class = "invalid validation" })}
+                                        </section>
+                                        <section class="col col-4">
+                                            <label class="input">
+                                                <i class="icon-prepend fa fa-user"></i>
+                                                @Html.PasswordFor(x => x.ConfirmPassword, new { @placeholder = CRM.Application.Core.Resources.Administration.User.ConfirmPassword })
+                                            </label>
+                                            @if( Model.Id == Guid.Empty) { @Html.ValidationMessageFor(x => x.ConfirmPassword, null, new { @class = "invalid validation" })}
+                                            else
+                                            {
+                                                
+                                            }
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-2">
+                                            <label class="input">
+                                                @General.MonHours
+                                                @Html.TextBoxFor(x => x.MonHours, new { @placeholder = @General.MonHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.MonHours, null, new { @class = "invalid validation" })
+
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="input">
+                                                @General.TueHours
+                                                @Html.TextBoxFor(x => x.TueHours, new { @placeholder = @General.TueHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.TueHours, null, new { @class = "invalid validation" })
+
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="input">@General.WedHours
+                                                @Html.TextBoxFor(x => x.WedHours, new { @placeholder = @General.WedHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.WedHours, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="input">
+                                                @General.ThurHours
+                                                @Html.TextBoxFor(x => x.ThursHours, new { @placeholder = @General.ThurHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.ThursHours, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="input">
+                                                @General.FriHours
+                                                @Html.TextBoxFor(x => x.FriHours, new { @placeholder = @General.FriHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.FriHours, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="input">
+                                                @General.SatHours
+                                                @Html.TextBoxFor(x => x.SatHours, new { @placeholder = @General.SatHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.SatHours, null, new { @class = "invalid validation" })
+                                        </section>
+                                        <section class="col col-2">
+                                            <label class="input">
+                                                @General.SunHours
+                                                @Html.TextBoxFor(x => x.SunHours, new { @placeholder = @General.SunHours })
+                                            </label>
+                                            @Html.ValidationMessageFor(x => x.SunHours, null, new { @class = "invalid validation" })
+                                        </section>
+                                    </div>
+                                    <div class="row">
+                                        <section class="col col-3">
+                                            <label class="toggle">
+                                                @Html.HiddenFor(x => x.IsEnabled, new { @name = "IsEnabled", @id = "hiddenIdEnabled" })
+                                                <input type="checkbox" id="switchActiveUser" name="checkbox-toggle" checked="checked">
+                                                <i data-swchon-text="ON" data-swchoff-text="OFF"></i> Active User
+                                            </label>
+                                        </section>
+                                    </div>
+                                </fieldset>
+                                <footer>
+                                    <button type="submit" class="btn btn-primary">
+                                        Save
+                                    </button>
+                                </footer>
+                            </form>
+
+                        </div>
+                        <!-- end widget content -->
+                    </div>
+                    <!-- end widget div -->
+
+                </div>
+                <!-- end widget -->
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget" id="wid-id-3" data-widget-editbutton="false" data-widget-custombutton="false">
+                    <!-- widget options:
+                        usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                        data-widget-colorbutton="false"
+                        data-widget-editbutton="false"
+                        data-widget-togglebutton="false"
+                        data-widget-deletebutton="false"
+                        data-widget-fullscreenbutton="false"
+                        data-widget-custombutton="false"
+                        data-widget-collapsed="true"
+                        data-widget-sortable="false"
+
+                    -->
+
+
+                </div>
+
+
+            </article>
+            <!-- END COL -->
+            <!-- NEW COL START -->
+            <!-- END COL -->
+
+        </div>
+
+        <!-- END ROW -->
+
+    </section>
+
+
+
+</div>
+<!-- END MAIN CONTENT -->
+
+<script src="~/Scripts/CRM/Authentication/CreateUser.js"></script>
+<script src="~/Scripts/CRM/General/Response.js"></script>
+<script src="~/Scripts/CRM/Enum/TransactionType.js"></script>

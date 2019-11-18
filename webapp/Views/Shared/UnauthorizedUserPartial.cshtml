@@ -1,0 +1,36 @@
+﻿@{Layout = null;}			
+<!-- MAIN CONTENT -->
+<div id="content">
+
+    <!-- row -->
+    <div class="row">
+
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="text-center error-box">
+                        <h1 class="error-text tada animated"><i class="fa fa-times-circle text-danger error-icon-shadow"></i>@CRM.Application.Core.Resources.Authorization.Authorization.Unauthorized.ToLower()</h1>
+                        <h2 class="font-xl"><strong>@CRM.Application.Core.Resources.Authorization.Authorization.YouAreUnauthorized</strong></h2>
+                        <br />
+                        <p class="lead semi-bold">
+                            <strong>@CRM.Application.Core.Resources.Authorization.Authorization.PleaseContactAdmin</strong><br><br>
+                            <small>
+                            </small>
+                        </p>
+                        <ul class="error-search text-left font-md">
+                            <li><a href="@Url.Action("Index","Home")"><small>@CRM.Application.Core.Resources.Administration.DashboardLists.GotoMyDashboard <i class="fa fa-arrow-right"></i></small></a></li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- end row -->
+
+</div>
+<!-- END MAIN CONTENT -->

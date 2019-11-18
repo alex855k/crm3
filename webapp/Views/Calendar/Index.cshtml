@@ -1,0 +1,313 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerAppointmentViewModel
+@using Newtonsoft.Json;
+@{
+    string currentCulture = "en";
+    if (UICulture == "en-US")
+    {
+        currentCulture = "en";
+
+    }
+    else if (UICulture == "da-DK")
+    {
+        currentCulture = "da";
+    }
+}
+
+
+
+@{var appointments = JsonConvert.SerializeObject(Model.AppointmentsList); }
+@Html.Hidden("appointmentsList", @appointments, new { id = "appointmentsList" })
+@Html.Hidden("hiddenAppointmentId", null, new { id = "hiddenAppointmentId" })
+@Html.Hidden("hiddenCurrentCustomerId", null, new { id = "hiddenCurrentCustomerId" })
+@Html.Hidden("hiddenCurrentCulture", currentCulture)
+<!-- MAIN CONTENT -->
+<div id="content">
+    <!-- widget grid -->
+    <section id="widget-grid" class="">
+        <!-- row -->
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-id-1" data-widget-editbutton="false">
+                    <!-- widget options:
+                    usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                    data-widget-colorbutton="false"
+                    data-widget-editbutton="false"
+                    data-widget-togglebutton="false"
+                    data-widget-deletebutton="false"
+                    data-widget-fullscreenbutton="false"
+                    data-widget-custombutton="false"
+                    data-widget-collapsed="true"
+                    data-widget-sortable="false"
+
+                    -->
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-calendar"></i> </span>
+                        <h2>@CRM.Application.Core.Resources.Calendar.Calendar.CalendarTitle</h2>
+                        <div class="widget-toolbar">
+                            <!-- add: non-hidden - to disable auto hide -->
+                            <div class="btn-group">
+                                <button class="btn dropdown-toggle btn-xs btn-default" data-toggle="dropdown">
+                                    @CRM.Application.Core.Resources.DynamicTable.Pagination.Showing <i class="fa fa-caret-down"></i>
+                                </button>
+                                <ul class="dropdown-menu js-status-update pull-right">
+                                    <li>
+                                        <a href="javascript:void(0);" id="mt">@CRM.Application.Core.Resources.Calendar.Calendar.Month</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" id="ag">@CRM.Application.Core.Resources.Calendar.Calendar.Agenda</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" id="td">@CRM.Application.Core.Resources.Calendar.Calendar.Today</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button id="btnOpenModal" class="btn btn-xs btn-default" data-toggle="modal" data-target="#createAppointmentModal">
+                                    @CRM.Application.Core.Resources.General.General.New @CRM.Application.Core.Resources.Customers.Customer.Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+
+                            <!-- content goes here -->
+                            <div class="widget-body-toolbar">
+
+                                <div id="calendar-buttons">
+
+                                    <div class="btn-group">
+                                        <a href="javascript:void(0)" class="btn btn-default btn-xs" id="btn-prev"><i class="fa fa-chevron-left"></i></a>
+                                        <a href="javascript:void(0)" class="btn btn-default btn-xs" id="btn-next"><i class="fa fa-chevron-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="calendar"></div>
+                            <!-- end content -->
+
+                        </div>
+                        <!-- end widget content -->
+                    </div>
+                    <!-- end widget div -->
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+        <!-- end row -->
+        <!-- end row -->
+    </section>
+    <!-- end widget grid -->
+
+</div>
+<!-- END MAIN CONTENT -->
+<!-- Modal -->
+<div class="modal fade" id="createAppointmentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">@CRM.Application.Core.Resources.General.General.Create @CRM.Application.Core.Resources.Customers.Customer.Appointment</h4>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    @Html.Hidden("hiddenCustomerStatusId", new { id = "hiddenCustomerStatusId" })
+                    <div class="row">
+                        <div id="customersddlDiv" class="col-md-10">
+                            <div class="form-group">
+                                <label for="tags"> @CRM.Application.Core.Resources.General.General.Customers</label>
+                                @Html.DropDownListFor(x => x.CustomerId, new SelectList(Model.CustomersList, "Id", "CompanyName"), CRM.Application.Core.Resources.Customers.Customer.Customers, new { id = "customers", @class = "select2", @style = "width:100%" })
+                                @Html.ValidationMessageFor(x => x.CustomerId, null, new { @class = "invalid validation" })
+                            </div>
+                        </div>
+                        <div id="navigateCustomerSection" style="display:none">
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <label for="">&nbsp;</label>
+                                    <a id="navigateToCustomer" data-id="@Model.CustomerId" class="btn btn-primary" href="javascript:void(0);"><i class="fa fa-user"></i></a>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <label for="">&nbsp;</label>
+                                    <a id="deleteAppointment" data-id="@Model.CustomerId" class="btn btn-danger" href="javascript:void(0);"><i class="fa fa-trash-o"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="category"> @CRM.Application.Core.Resources.Calendar.Calendar.Date</label>
+                                <div class="input-group" data-provide="">
+                                    <input id="appointmentDate" type="text" class="form-control">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="tags"> @CRM.Application.Core.Resources.Calendar.Calendar.StartTime</label>
+                                <select class="form-control" id="appointmentStartTimeH">
+                                    @foreach (var hour in Model.Hours)
+                                    {
+                                        <option value="@hour.ToString("00")">@hour.ToString("00")</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="tags">&nbsp; </label>
+                                <select class="form-control" id="appointmentStartTimeM">
+                                    @foreach (var minute in Model.Minutes)
+                                    {
+                                        <option value="@minute.ToString("00")">@minute.ToString("00")</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="category">Subject</label>
+                                <input type="text" class="form-control" id="appointmentSubject" placeholder="" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="tags">End Time</label>
+                                <select class="form-control" id="appointmentEndTimeH">
+                                    @foreach (var hour in Model.Hours)
+                                    {
+                                        <option value="@hour.ToString("00")">@hour.ToString("00")</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="tags">&nbsp; </label>
+                                <select class="form-control" id="appointmentEndTimeM">
+                                    @foreach (var minute in Model.Minutes)
+                                    {
+                                        <option value="@minute.ToString("00")">@minute.ToString("00")</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="tags">@CRM.Application.Core.Resources.Customers.Customer.AppointmentDescription</label>
+                                <textarea class="form-control" placeholder="" rows="5" id="appointmentDesc"></textarea>
+
+                            </div>
+                        </div>
+                    </div>
+                    @{Html.RenderPartial("_AppointmentEmail", Model);}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>@CRM.Application.Core.Resources.General.General.Select @CRM.Application.Core.Resources.Customers.Customer.AppointmentIcon</label>
+                                <div class="btn-group btn-group-sm btn-group-justified" data-toggle="buttons">
+                                    <label class="btn lblEventIcon btn-default active">
+                                        <input type="radio" name="eventIcon" id="icon-1" value="fa-info" checked>
+                                        <i class="fa fa-info text-muted"></i>
+                                    </label>
+                                    <label class="btn lblEventIcon btn-default">
+                                        <input type="radio" class="eventIcon" name="eventIcon" id="icon-2" value="fa-warning">
+                                        <i class="fa fa-warning text-muted"></i>
+                                    </label>
+                                    <label class="btn lblEventIcon btn-default">
+                                        <input type="radio" class="eventIcon" name="eventIcon" id="icon-3" value="fa-check">
+                                        <i class="fa fa-check text-muted"></i>
+                                    </label>
+                                    <label class="btn lblEventIcon btn-default">
+                                        <input type="radio" class="eventIcon" name="eventIcon" id="icon-4" value="fa-user">
+                                        <i class="fa fa-user text-muted"></i>
+                                    </label>
+                                    <label class="btn lblEventIcon btn-default">
+                                        <input type="radio" class="eventIcon" name="eventIcon" id="icon-5" value="fa-lock">
+                                        <i class="fa fa-lock text-muted"></i>
+                                    </label>
+                                    <label class="btn lblEventIcon btn-default">
+                                        <input type="radio" class="eventIcon" name="eventIcon" id="icon-6" value="fa-clock-o">
+                                        <i class="fa fa-clock-o text-muted"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>@CRM.Application.Core.Resources.General.General.Select @CRM.Application.Core.Resources.Customers.Customer.AppointmentColor</label>
+                                <div class="btn-group btn-group-justified btn-select-tick" data-toggle="buttons">
+                                    <label class="btn lblEventColor bg-color-darken active">
+                                        <input type="radio" name="eventColor" class="eventColor" id="option1" value="bg-color-darken" checked>
+                                        <i class="fa fa-check txt-color-white"></i>
+                                    </label>
+                                    <label class="btn lblEventColor bg-color-blue">
+                                        <input type="radio" name="eventColor" class="eventColor" id="option2" value="bg-color-blue">
+                                        <i class="fa fa-check txt-color-white"></i>
+                                    </label>
+                                    <label class="btn lblEventColor bg-color-orange">
+                                        <input type="radio" name="eventColor" class="eventColor" id="option3" value="bg-color-orange">
+                                        <i class="fa fa-check txt-color-white"></i>
+                                    </label>
+                                    <label class="btn lblEventColor bg-color-greenLight">
+                                        <input type="radio" name="eventColor" class="eventColor" id="option4" value="bg-color-greenLight">
+                                        <i class="fa fa-check txt-color-white"></i>
+                                    </label>
+                                    <label class="btn lblEventColor bg-color-blueLight">
+                                        <input type="radio" name="eventColor" class="eventColor" id="option5" value="bg-color-blueLight">
+                                        <i class="fa fa-check txt-color-white"></i>
+                                    </label>
+                                    <label class="btn lblEventColor bg-color-red">
+                                        <input type="radio" name="eventColor" class="eventColor" id="option6" value="bg-color-red">
+                                        <i class="fa fa-check txt-color-white"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    @CRM.Application.Core.Resources.General.General.Cancel
+                </button>
+                <button id="saveAppointment" type="button" class="btn btn-primary">
+                    @CRM.Application.Core.Resources.General.General.Save
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<link href="~/Scripts/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/plugin/bootstrap-tags/bootstrap-tagsinput.min.js"></script>
+<script src="~/Scripts/CRM/Calendar/CalendarAppointments.js"></script>
+<script src="~/Scripts/CRM/Calendar/Calendar.js"></script>

@@ -1,0 +1,34 @@
+﻿@model CRM.Application.Core.ViewModels.DashboardListColumnsViewModel
+@{
+    Layout = null;
+}
+
+<form id="dashboardListColumnsForm" class="smart-form">
+    @Html.HiddenFor(x => x.Id, new { @id = "HiddenId" })
+    @Html.HiddenFor(x => x.DashboardListId, new { @id = "HiddenDashboardListId" })
+    <fieldset>
+        <div class="row">
+            <section class="col col-6">
+                <label class="input">
+                    <i class="icon-prepend fa fa-user"></i>
+                    @Html.TextBoxFor(x => x.Name, new { @placeholder = CRM.Application.Core.Resources.Administration.DashboardLists.ColumnName })
+                </label>
+                @Html.ValidationMessageFor(x => x.Name, null, new { @class = "invalid validation" })
+            </section>
+            <section class="col col-6">
+                <label class="input">
+                    <i class="icon-prepend fa fa-user"></i>
+                    @Html.TextBoxFor(x => x.Description, new { @placeholder = CRM.Application.Core.Resources.Administration.DashboardLists.ColumnDesc })
+                    <i></i>
+                </label>
+            </section>
+        </div>
+    </fieldset>
+    <footer>
+        <button type="submit" id="" class="btn btn-primary">
+            Save
+        </button>
+    </footer>
+</form>
+
+

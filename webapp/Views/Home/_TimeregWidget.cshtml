@@ -1,0 +1,399 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using Microsoft.AspNet.Identity
+@using CRM.Application.Core.Resources.TimeRegistrations
+@{
+    Layout = null;
+}
+<input type="hidden" id="hiddenUserId" name="hiddenUserId" value="@User.Identity.GetUserId()">
+<style>
+    .dd3-handle {
+        height: 35px;
+    }
+
+    ul {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 0 !important;
+    }
+</style>
+<!-- Widget ID (each widget will need unique ID)-->
+<div class="jarviswidget" id="wid-id-5" data-widget-editbutton="false" data-widget-custombutton="false">
+    <!-- widget options:
+    usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+    data-widget-colorbutton="false"
+    data-widget-editbutton="false"
+    data-widget-togglebutton="false"
+    data-widget-deletebutton="false"
+    data-widget-fullscreenbutton="false"
+    data-widget-custombutton="false"
+    data-widget-collapsed="true"
+    data-widget-sortable="false"
+
+    -->
+    <header>
+        <span class="widget-icon"> <i class="fa fa-clock-o"></i> </span>
+        <h2>@TimeReg.TimeRegistration</h2>
+        <div class="jarviswidget-ctrls">
+
+        </div>
+    </header>
+
+    <!-- widget div-->
+    <div>
+        <!-- widget content -->
+        <div class="widget-body timeRegistrationWidget">
+
+            <div class="row">
+                <div class="pull-left col-md-3 col-sm-3 col-xs-4">
+                    <table>
+                        <tr>
+                            <td id="timeRegBtns">
+                                <button class="btn btn-lg btn-success" id="timeRegStartBtn" style="height: 82px">@TimeReg.Start</button>
+                            </td>
+                            <td style="padding: 10px">
+                                <ul>@TimeReg.Start:<b><span id="startTime">XX:XX</span></b></ul>
+                                <ul><b><span id="timeRunning" data-active="0">0@{@TimeReg.shortHour}:00@{@TimeReg.shortMin}:00@{@TimeReg.shortSec}</span></b></ul>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="pull-left col-md-6 col-sm-6 col-xs-4">
+                    <ul>
+                        <div class="input-group" style="height:100%">
+                            <div class="input-group-addon">@TimeReg.Customer</div>
+                            <select onchange="customerChange(this)" ; style="width:100% !important" class="select2" id="customerSelect">
+                                <option value="null">-</option>
+                                @foreach (var customer in Model.CustomersList)
+                                {
+                                    <option value="@customer.Id">@customer.CompanyName</option>
+                                }
+                            </select>
+                        </div>
+                    </ul>
+                    <ul>
+                        <div class="input-group" style="height:100%">
+                            <div  class="input-group-addon">@Customer.Case</div>
+                            <select onchange="caseChange(this)" ; class="select2" id="caseSelect"></select>
+                        </div>
+                    </ul>
+                    <ul>
+                        <div class="input-group" style="height:100%">
+                            <div class="input-group-addon">@Customer.Assignment</div>
+                            <select class="select2" id="assignmentSelect"></select>
+                        </div>
+                    </ul>
+                </div>
+
+                <div id="btnUl" class="pull-right col-sm-3 col-md-3 col-xs-4" style="height:100%">
+                    <ul>
+                        <button id="timeRegBtn" class="btn btn-primary">@TimeReg.TimeRegistrations</button>
+                    </ul>
+
+                </div>
+            </div>
+                            <div class="modal fade" id="TimeRegModal" data-caseId="" tabindex="-1" role="dialog">
+                                @{Html.RenderAction("TimeRegistrationModal", "Timeregistration");}
+
+                            </div>
+                            <div class="modal fade" id="ProductModal" tabindex="-1" role="dialog">
+                                @{Html.RenderAction("ProductModal", "Home");}
+
+                            </div>
+                            <div class="modal fade" id="descriptionModal"  tabindex="-1" role="dialog">
+                                <div class="modal-dialog modal-md">
+                                    <div class="modal-content" id="modalContent">
+                                        <div style="background: darkred;" class="modal-header">
+                                            <button style="color: white" type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                                &times;
+                                            </button>
+                                            <h4 class="modal-title" style="color: white" id="myModalLabel">@TimeReg.Save @TimeReg.TimeRegistration</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            
+                                                <div class="form-group">
+                                                    <label for="timeRegDescription">@TimeReg.Description</label>
+                                                    <textarea class="form-control" id="timeRegDescriptionTextArea" placeholder="@TimeReg.TimeRegistration @TimeReg.Description" rows="5" required></textarea>
+                                                </div>
+                                            
+                                        </div><!-- /.modal-content -->
+                                        <div class="modal-footer">
+                                            <div>
+                                                <button type="button" data-loading-text="@TimeReg.Saving..." class="btn btn-primary" id="saveTimeRegBtn">
+                                                    @TimeReg.Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div><!-- /.modal-dialog -->
+                                </div>
+
+                            </div>
+
+        </div>
+        <!-- end widget content -->
+    </div>
+    <!-- end widget div -->
+
+</div>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<script src="~/Scripts/plugin/select2/select2.min.js"></script>
+<style type="text/css">
+    .timeRegistrationWidget .input-group-addon {
+        min-width: 100px;
+    }
+</style>
+<!-- end widget -->
+<script>
+
+    var startBtn = '<button class="btn btn-lg btn-success" id="timeRegStartBtn" style="height: 82px">@TimeReg.Start</button>';
+    var stopBtn =
+        '<button id="timRegStopBtn" class="btn btn-lg btn-danger" style="height: 82px">@TimeReg.Stop</button>';
+
+    var productBtn = '<ul id="productBtnUl" ><button id="productBtn" data-url="" class="btn">@TimeReg.Product</button></ul>';
+    $(document).ready(function () {
+        $.ajax({
+            url: "/Home/GetActiveTimeReg",
+            data: { "UserId": $("#hiddenUserId").val() },
+            success: function (data) {
+                if (data.ActiveCase) {
+                    $("#timeRegBtns").html(stopBtn);
+                    $("#customerSelect").val(data.activeTimereg.CustomerCase.CustomerId).trigger("change");
+                    $("#caseSelect").select2('data', { id: data.activeTimereg.CustomerCase.Id, text: data.activeTimereg.CustomerCase.Titel });
+                    $('#customerSelect').prop("disabled", true);
+                    $('#caseSelect').prop("disabled", true);
+                    var start = data.Start;
+                    var mstart = moment.utc(start).local();
+                    $("#startTime").text("kl." + mstart.format("HH:mm:s"));
+                    $("#timeRunning").attr("data-active", "1");
+                    TimerUpdater(mstart);
+
+                    $.ajax({
+                        url: "/Home/GetWebShopUrl",
+                        data: { "customerId": data.customerCase.CustomerId, "caseId": data.customerCase.Id },
+                        success: function (data) {
+                            $("#btnUl").append(productBtn);
+                            $("#productBtn").attr("data-url", data.webshopUrl);
+
+                        },
+                        error: function (data) {
+                            toastr.error("Failed getting WebshopUrl");
+
+                        }
+                    });
+
+                }
+            },
+            error: function (data) {
+                $("#timRegStopBtn").addClass('disabled');
+                $("#timeRegStartBtn").addClass('disabled');
+
+                toastr.error("Failed getting TimeReg");
+
+            }
+        });
+
+
+
+    });
+    $(document).ready(function () {
+        $.ajax({
+            url: "/Home/GetActiveTimeReg",
+            data: { "UserId": $("#hiddenUserId").val() },
+            success: function (data) {
+                if (data.ActiveCase) {
+                    $("#timeRegBtns").html(stopBtn);
+                    $("#customerSelect").val(data.activeTimereg.CustomerCase.CustomerId).trigger("change");
+                    $("#caseSelect").select2('data', { id: data.activeTimereg.CustomerCase.Id, text: data.activeTimereg.CustomerCase.Titel });
+                    $('#customerSelect').prop("disabled", true);
+                    $('#caseSelect').prop("disabled", true);
+                    var start = data.Start;
+                    var mstart = moment.utc(start).local();
+                    $("#startTime").text("kl." + mstart.format("HH:mm:s"));
+                    $("#timeRunning").attr("data-active", "1");
+                    TimerUpdater(mstart);
+
+                    $.ajax({
+                        url: "/Home/GetWebShopUrl",
+                        data: { "customerId": data.customerCase.CustomerId, "caseId": data.customerCase.Id },
+                        success: function (data) {
+                            $("#btnUl").append(productBtn);
+                            $("#productBtn").attr("data-url", data.webshopUrl);
+
+                        },
+                        error: function (data) {
+                            toastr.error("Failed getting WebshopUrl");
+
+                        }
+                    });
+
+                }
+            },
+            error: function (data) {
+                $("#timRegStopBtn").addClass('disabled');
+                $("#timeRegStartBtn").addClass('disabled');
+
+                toastr.error("Failed getting TimeReg");
+
+            }
+        });
+
+
+
+    });
+
+    function customerChange(e) {
+        var id = e.value;
+        $.ajax({
+            url: "/Home/GetCustomerCaseList",
+            type: "Post",
+            data: { "id": id },
+            success: function (data) {
+                var list = data.customerCasesList;
+                $('#caseSelect').select2('data', null);
+                $('#caseSelect').empty();
+                $.each(list, function (e, i) {
+                    var newOption = new Option(i.Titel, i.Id, false, false);
+                    $('#caseSelect').append(newOption).trigger('change');
+                });
+
+                if ($("#caseSelect option:contains('Generel')").length) {
+                    $('#caseSelect').val($("#caseSelect option:contains('Generel')").val()).trigger('change');
+                } else {
+                    // Create a DOM Option and pre-select by default
+                    var newOption = new Option("Generel", null, true, true);
+                    // Append it to the select
+                    $('#caseSelect').append(newOption).trigger('change');
+                }
+
+            },
+            error: function (data) {
+                toastr.error("En kunde skal være valgt.");
+            }
+        });
+    }
+
+  
+    function caseChange(e) {
+        var caseId = e.value;
+        $.ajax({
+            url: "/CustomerCases/GetCaseAssignments",
+            type: "GET",
+            data: { caseId: caseId },
+            success: function (data) {
+                var list = data.AssignmentsList;
+                $('#assignmentSelect').select2('data', null);
+                $('#assignmentSelect').empty();
+                var newOption = new Option("-", null, true, true);
+                $('#assignmentSelect').append(newOption).trigger('change');
+                $.each(list, function (e, i) {
+                    var title = i.Title;
+                    var newOption = new Option(title, i.Id, false, false);
+                    $('#assignmentSelect').append(newOption).trigger('change');
+                    e++;
+                });
+            },
+            error: function (data) {
+                 toastr.error("En sag skal være valgt.");
+            }
+        });
+    }
+  
+    $(document).off("click", "#timRegStopBtn");
+    $(document).on("click", "#timRegStopBtn", function () {
+
+        $("#descriptionModal").modal("show");
+       
+    });
+  
+    $(document).off("click", "#timeRegStartBtn");
+    $(document).on("click", "#timeRegStartBtn",
+        function () {
+            var customerId = $('#customerSelect').val();
+            var caseId = $('#caseSelect').val();
+            var caseText = $('#caseSelect :selected').text();
+            if (customerId === "null") {
+                toastr.error("En kunde og en sag skal være valgt.");
+            } else {
+
+        $.ajax({
+            url: "/Home/StartTimeReg",
+            type: "Post",
+            data: { "UserId": $("#hiddenUserId").val(), "customerId": parseInt(customerId), "caseId": parseInt(caseId) },
+            success: function(data) {
+                    $("#timeRegBtns").html(stopBtn);
+                   
+                    var start = data.Start;
+                    var mstart = moment.utc(start).local();
+
+                    $("#btnUl").append(productBtn);
+                    $("#productBtn").attr("data-url", data.webshopUrl);
+
+                    $("#startTime").text(mstart.format("HH:mm:s"));
+
+                    $("#timeRunning").attr("data-active", "1");
+                TimerUpdater(mstart);
+                    $('#assignmentSelect').prop("disabled", true);
+                    $('#customerSelect').prop("disabled", true);
+                    $('#caseSelect').prop("disabled", true);
+            },
+            error: function(data) {
+                $("#timRegStopBtn").addClass('disabled');
+                $("#timeRegStartBtn").addClass('disabled');
+
+                toastr.error("Failed Starting TimeReg");
+
+            }
+                });
+            }
+    });
+
+
+
+    $(document).off("click", "#saveTimeRegBtn");
+    $(document).on("click", "#saveTimeRegBtn",
+        function () {
+        $.ajax({
+            url: "/Home/StopTimeReg",
+            type: "Post",
+            data: { "UserId": $("#hiddenUserId").val(), "description" : $("#timeRegDescriptionTextArea").val()},
+            success: function(data) {
+                $("#timeRegBtns").html(startBtn);
+
+                $("#startTime").text("XX:XX");
+                $("#timeRunning").text("0@{@TimeReg.shortHour}:00@{@TimeReg.shortMin}:00@{@TimeReg.shortSec}");
+                $("#timeRunning").attr("data-active", "0");
+                toastr.success("@TimeReg.Saved");
+                $('#customerSelect').prop("disabled", false);
+                $('#assignmentSelect').prop("disabled", false);
+                $('#caseSelect').prop("disabled", false);
+
+                $("#productBtnUl").remove();
+                $("#timeRegDescriptionTextArea").val("")
+                $("#descriptionModal").modal("hide");
+            },
+            error: function(data) {
+                $("#timRegStopBtn").addClass('disabled');
+                $("#timeRegStartBtn").addClass('disabled');
+
+                toastr.error("Failed Stopping TimeReg");
+            }
+        });
+    });
+
+    function TimerUpdater(start) {
+        UpdateTimer(start);
+        setTimeout(function () {
+            if ($("#timeRunning").attr("data-active") === "1") {
+                TimerUpdater(start);
+            } else {}
+            }, 1000);
+        }
+
+
+    function UpdateTimer(start) {
+        $("#timeRunning").text(moment.duration(moment().diff(start))
+            .format("h[@TimeReg.shortHour]:mm[@TimeReg.shortMin]:ss[@TimeReg.shortSec]", { trim: false }));
+    }
+
+</script>

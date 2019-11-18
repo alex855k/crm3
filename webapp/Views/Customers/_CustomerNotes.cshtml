@@ -1,0 +1,11 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerNotesViewModel
+@{
+    Layout = null;
+}
+<div id="customerNotesFormDiv">
+    @{Html.RenderAction("CustomerNotesForm", "Customers");}
+</div>
+<div id="divCustomerNotesList">
+    @{Html.RenderAction("CustomerNotesList", "Customers");}
+</div>
+

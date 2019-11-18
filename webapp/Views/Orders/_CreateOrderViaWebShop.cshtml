@@ -1,0 +1,10 @@
+﻿@model CRM.Application.Core.ViewModels.OrderViewModel
+<form id="createOrderForm" class="smart-form">
+    @Html.HiddenFor(x => x.Id, new { @id = "OrderId" })
+    @Html.HiddenFor(x => x.CustomerId, new { @id = "hiddenCustomerId" })
+    <div class="row">
+        <section class="col col-md-12">
+            <iframe style="width:100%;height:60vh;border:none;" src="@Model.WebShopUrl"></iframe>
+        </section>
+    </div>
+</form>

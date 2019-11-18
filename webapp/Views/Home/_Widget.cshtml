@@ -1,0 +1,143 @@
+﻿@model IEnumerable<CRM.Application.Core.ViewModels.DashboardListsViewModel>
+
+@{
+    Layout = null;
+}
+<style>
+    .dd3-handle {
+        height: 35px;
+    }
+</style>
+<article class="col-sm-12 col-md-12 col-lg-12">
+    @Html.Hidden("hiddenCurrentCustomerDashboardListId", new { id = "hiddenCurrentCustomerDashboardListId" })
+    @foreach (var dashboardList in Model)
+    {
+        <!-- Widget ID (each widget will need unique ID)-->
+        <div class="jarviswidget" id="wid-id-@dashboardList.Id" data-widget-editbutton="false" data-widget-custombutton="false">
+            <!-- widget options:
+                usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                data-widget-colorbutton="false"
+                data-widget-editbutton="false"
+                data-widget-togglebutton="false"
+                data-widget-deletebutton="false"
+                data-widget-fullscreenbutton="false"
+                data-widget-custombutton="false"
+                data-widget-collapsed="true"
+                data-widget-sortable="false"
+
+            -->
+            <header>
+                <span class="widget-icon"> <i class="fa fa-edit"></i> </span>
+                <h2>@dashboardList.Name </h2>
+                <div class="jarviswidget-ctrls">
+                    <a href="javascript:void(0);" class="button-icon jarviswidget-btn btnDeleteWidget" rel="tooltip" title="" data-placement="bottom" data-original-title="@CRM.Application.Core.Resources.Administration.DashboardLists.DeleteWidget"
+                       data-dashboardlistId="@dashboardList.Id"
+                       data-title="@CRM.Application.Core.Resources.Administration.DashboardLists.DeleteWidget!"
+                       data-content="@CRM.Application.Core.Resources.Administration.DashboardLists.DeleteWidgetConfirm"
+                       data-yes="@CRM.Application.Core.Resources.General.General.Yes"
+                       data-no="@CRM.Application.Core.Resources.General.General.No"><i class="fa fa-trash-o"></i></a>
+                </div>
+            </header>
+
+            <!-- widget div-->
+            <div>
+
+                <!-- widget edit box -->
+                <div class="jarviswidget-editbox">
+                    <!-- This area used as dropdown edit box -->
+
+                </div>
+                <!-- end widget edit box -->
+                <!-- widget content -->
+                <div class="widget-body">
+                    <div id="customerTabContent" class="tab-content padding-10">
+                        <div class="tab-pane fade in active" id="">
+                            @if (Model != null && dashboardList.DashboardListColumns.Count() > 0)
+                            {
+                                int colWidth = (12 / dashboardList.DashboardListColumns.Count());
+                                foreach (var column in dashboardList.DashboardListColumns)
+                                {
+
+                                    <div class="col-sm-6 @("col-lg-" + colWidth)">
+                                        <h6>@column.Name</h6>
+                                        @if (column.CustomerDashboardListViewModel.Count > 0)
+                                        {
+                                            @*<div class="dd">*@
+                                            <div class="dd listColumns" id="@("nestable" + column.Id)" data-columnId="@column.Id">
+                                                <ol class="dd-list">
+                                                    @foreach (var customerDashboardList in column.CustomerDashboardListViewModel)
+                                                    {
+                                                        <li data-customerId="@customerDashboardList.CustomerId"
+                                                            data-customerDashboardListId="@customerDashboardList.Id"
+                                                            data-dashboardlistid="@dashboardList.Id"
+                                                            class="dd-item dd3-item">
+                                                            <div class="dd-handle dd3-handle">
+
+                                                            </div>
+                                                            <div class="dd3-content">
+                                                                <a href="@Url.Action("Edit", "Customers", new { @id = @customerDashboardList.Customer.Id,@LatestCustomersPageNumber=0,@isCustomer = @customerDashboardList.Customer.CustomerStatusId == 1?true : false })"> @customerDashboardList.Customer.CompanyName</a>
+                                                                <em class="pull-right badge bg-color-orange padding-5">
+                                                                    <a href="javascript:void(0);"
+                                                                       class="removeCustomerFromList" rel="tooltip" title="" data-placement="bottom" data-original-title="Remove Customer From List"
+                                                                       data-customerDashboardList="@customerDashboardList.Id"
+                                                                       data-title="@CRM.Application.Core.Resources.Administration.DashboardLists.RemoveCustomer!"
+                                                                       data-content="@CRM.Application.Core.Resources.Administration.DashboardLists.RemoveCustomerConfirm"
+                                                                       data-yes="@CRM.Application.Core.Resources.General.General.Yes"
+                                                                       data-no="@CRM.Application.Core.Resources.General.General.No">
+                                                                        <i class="fa fa-trash-o fa-md txt-color-white"></i>
+                                                                    </a>
+                                                                </em>
+                                                            </div>
+                                                        </li>
+
+                                                    }
+                                                </ol>
+                                            </div>
+                                            @*</div>*@
+                                        }
+                                        else
+                                        {
+                                            <div class="dd listColumns" id="@("nestable" + column.Id)"
+                                                 data-columnId="@column.Id"
+                                                 data-dashboardListId="@column.DashboardListId">
+                                                <ol class="dd-list">
+                                                    <li class="dd-item dd3-item">
+                                                    </li>
+                                                </ol>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <!-- end widget content -->
+            </div>
+            <!-- end widget div -->
+
+        </div>
+        <!-- end widget -->
+    }
+    <!-- Widget ID (each widget will need unique ID)-->
+    <div class="jarviswidget" id="wid-id-3" data-widget-editbutton="false" data-widget-custombutton="false">
+        <!-- widget options:
+            usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+            data-widget-colorbutton="false"
+            data-widget-editbutton="false"
+            data-widget-togglebutton="false"
+            data-widget-deletebutton="false"
+            data-widget-fullscreenbutton="false"
+            data-widget-custombutton="false"
+            data-widget-collapsed="true"
+            data-widget-sortable="false"
+
+        -->
+    </div>
+</article>
+
+
+<script src="~/Scripts/nestabe2/jquery.nestable.min.js"></script>
+<script src="~/Scripts/CRM/Dashboard/dashboard.js"></script>

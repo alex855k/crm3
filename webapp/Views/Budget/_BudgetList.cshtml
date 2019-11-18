@@ -1,0 +1,61 @@
+﻿@model CRM.Application.Core.ViewModels.BudgetViewModel
+
+@{
+    Layout = null;
+}
+
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+@Html.Hidden("hiddenSelectedBudgetId", new { id = "hiddenSelectedBudgetId" })
+
+@foreach (var budget in Model.BudgetList)
+{
+    <tr role="row" class="odd">
+        <td class="expand sorting_1"><span class="responsiveExpander"></span>@budget.BudgetDate.ToString("MMMM  yyyy")</td>
+        <td> @(string.Format("{0} {1}", budget.SalesPerson.FirstName, budget.SalesPerson.LastName))</td>
+        <td>@budget.BudgetAmount</td>
+        <td>
+            <a href="@Url.Action("Edit", "Customers", new { @id = budget.Id })" title="Update"><i class="fa fa-pencil-square-o"></i></a> |
+
+            <a class="addCustomerToList" data-customerId="@budget.Id" href="#" title="Add to List"><i class="fa fa-list-ul" data-toggle="modal" data-target="#myModal"></i></a>
+        </td>
+    </tr>
+}
+
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">Add Customer To List</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h3>My Dashboard Lists </h3>
+                        <div id="divUserLists" class="smart-form">
+                        </div>
+                    </div>
+                    <label id="lblError"></label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Cancel
+                </button>
+                <button id="btnSaveCustomerToList" type="button" class="btn btn-primary">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--modal -->

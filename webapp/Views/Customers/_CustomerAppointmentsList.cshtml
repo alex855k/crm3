@@ -1,0 +1,26 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerAppointmentViewModel
+@{
+    Layout = null;
+}
+
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+
+@foreach (var appointment in Model.CustomerAppointmentsList)
+{
+    <tr role="row" class="odd">
+        <td class="expand sorting_1"><span class="responsiveExpander"></span>@appointment.Date.ToString("dd/MM/yyyy")</td>
+        <td>@appointment.Subject</td>
+        <td>@appointment.StartTime</td>
+        <td>
+            <a class="editAppointment" data-appointmentId="@appointment.Id" href="javascript:void(0)" title="Update"><i class="fa fa-pencil-square-o"></i></a> |
+
+            <a class="removeAppointment" data-appointmentId="@appointment.Id" href="javascript:void(0)" title="Remove Appointment"
+               data-title="Delete Appointment !"
+               data-content="Are you sure you want to delete customer appointment?"
+               data-yes="Yes"
+               data-no="No"><i class="fa fa-trash-o"></i></a>
+        </td>
+    </tr>
+}

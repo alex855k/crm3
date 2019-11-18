@@ -1,0 +1,164 @@
+﻿@model CRM.Application.Core.ViewModels.ProcedureViewModel
+<link rel="stylesheet" href="~/Content/css/print-procedure.css" media="print" />
+
+<!-- MAIN CONTENT -->
+<div id="content">
+    <div class="row">
+        <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
+            <h1 class="page-title txt-color-blueDark">
+                <!-- PAGE HEADER -->
+                <a href="@Url.Action("Index","Procedure")">@CRM.Application.Core.Resources.Procedures.Procedure.AProcedure</a>
+                <span>
+                    >
+                    @Model.Title
+                </span>
+            </h1>
+        </div>
+    </div>
+    <!-- widget grid -->
+    <section id="widget-grid" class="">
+        <!-- START ROW -->
+        <div class="row">
+            <!-- NEW COL START -->
+            <article class="col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget" id="wid-id-1" data-widget-editbutton="false" data-widget-custombutton="false">
+                    <!-- widget options:
+                        usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                        data-widget-colorbutton="false"
+                        data-widget-editbutton="false"
+                        data-widget-togglebutton="false"
+                        data-widget-deletebutton="false"
+                        data-widget-fullscreenbutton="false"
+                        data-widget-custombutton="false"
+                        data-widget-collapsed="true"
+                        data-widget-sortable="false"
+                    -->
+                    <header>
+                        <h2>@CRM.Application.Core.Resources.Procedures.Procedure.AProcedure</h2>
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body">
+                            
+                            @if (Model.Id != 0)
+                            {
+                                <div class="procedureWrapper print">
+                                    @if (Model.ImagePath != "null" && Model.ImagePath != null && Model.ImagePath != "undefined")
+                                    {
+                                        <div class="procedure">
+                                            <img src="~/Content/Uploads/Img/Procedure/@Model.ImagePath" alt="@Model.Title" title="@Model.Title" />
+                                        </div>
+                                    }
+                                    <div class="procedure">
+                                        <h1>@Model.Title</h1>
+                                        <span class="pull-right">Created: @Model.Created.ToLongDateString() @Model.Created.ToShortTimeString()</span>
+                                        @if (Model.Edited != null)
+                                        {
+                                            <br />
+                                            <span class="pull-right">Last edited: @Model.Edited.Value.ToLongDateString() @Model.Edited.Value.ToShortTimeString()</span>
+                                        }
+                                        <div class="no-print">
+                                            <br />
+                                            <a href="javascript:window.print()" class="pull-right">Print version</a>
+                                            <br />
+                                            <a href="@Url.Action("PdfVersion", new { @id = Model.Id })" target="_blank" class="pull-right">PDF</a>
+                                            <br />
+                                            <a href="#" class="js-sendtoemailpopup pull-right">Send as PDF to e-mail</a>
+                                        </div>
+                                        <div class="js-sendtoemailbox no-print">
+                                            <a href="#" class="js-sendtoemailclosepopup pull-right">Close form</a>
+                                            <br />
+                                            <form action="@Url.Action("SendToEmail")" class="smart-form">
+                                                <label for="Email" class="input">
+                                                    Email:
+                                                    <input id="Email" type="email" name="email" placeholder="Email" class="form-control" />
+                                                </label>
+                                                <br />
+                                                <label for="Subject" class="input">
+                                                    @CRM.Application.Core.Resources.Email.Email.Subject:
+                                                    <input id="Subject" type="text" name="subject" placeholder="Subject" class="form-control" />
+                                                </label>
+                                                <br />
+                                                <label for="Body">
+                                                    @CRM.Application.Core.Resources.Email.Email.Message:
+                                                    <textarea id="Body" name="body" placeholder="Message" class="form-control" rows="5" cols="20"></textarea>
+                                                </label>
+                                                <br />
+                                                @Html.HiddenFor(x => x.Id, new { @id = "procedureId" })
+                                                <input type="submit" class="btn btn-primary btn-sm pull-right" value="Send email" />
+                                            </form>
+                                        </div>
+                                        <hr />
+                                    </div>
+                                    @foreach (var item in Model.ProcedureItems)
+                                    {
+                                        <div class="procedureItem">
+                                            <div style="float: left; margin-left: 25%;">
+                                                <h2>@item.Title</h2>
+                                                @if (item.ImagePath != "null" && item.ImagePath != null && item.ImagePath != "undefined")
+                                                {
+                                                    <img src="~/Content/Uploads/Img/Procedure/@item.ImagePath" alt="@item.Title" title="@item.Title" style="float: left;" />
+                                                    <br />
+                                                }
+                                                <span>
+                                                    @item.Description
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span>@CRM.Application.Core.Resources.General.General.WhoopsPageDoesntExist</span>
+                            }
+                        </div>
+                        <!-- end widget content -->
+                    </div>
+                    <!-- end widget div -->
+
+                </div>
+                <!-- end widget -->
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget" id="wid-id-3" data-widget-editbutton="false" data-widget-custombutton="false">
+                    <!-- widget options:
+                        usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                        data-widget-colorbutton="false"
+                        data-widget-editbutton="false"
+                        data-widget-togglebutton="false"
+                        data-widget-deletebutton="false"
+                        data-widget-fullscreenbutton="false"
+                        data-widget-custombutton="false"
+                        data-widget-collapsed="true"
+                        data-widget-sortable="false"
+
+                    -->
+                </div>
+            </article>
+            <!-- END COL -->
+            <!-- NEW COL START -->
+            <!-- END COL -->
+
+        </div>
+
+        <!-- END ROW -->
+
+    </section>
+
+</div>
+<!-- END MAIN CONTENT -->
+
+<script src="~/Scripts/CRM/Procedures/DetailsProcedure.js"></script>
+<script src="~/Scripts/CRM/General/Response.js"></script>
+<script src="~/Scripts/CRM/Enum/TransactionType.js"></script>

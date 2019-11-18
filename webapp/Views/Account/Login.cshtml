@@ -1,0 +1,113 @@
+﻿@model CRM.Application.Core.ViewModels.LoginViewModel
+@{
+    ViewBag.PageId = "extr-page";
+    ViewBag.PageClass = "animated fadeInDown";
+    Layout = null;
+}
+
+
+<script src="~/Scripts/libs/jquery-2.1.1.min.js"></script>
+<script src="~/Scripts/plugin/jquery-validate/jquery.validate.min.js"></script> 
+<script src="~/Scripts/plugin/jquery-validate-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<script type="text/javascript">
+    var buttons = $(this).find('[type="submit"]');
+    if ($(this).valid()) {
+        buttons.each(function (btn) {
+            $(buttons[btn]).prop('disabled', true);
+        });
+    } else {
+        buttons.each(function (btn) {
+            $(buttons[btn]).prop('disabled', false);
+        });
+    }
+
+</script>
+
+<!DOCTYPE html>
+<html lang="en-us" id="@ViewBag.PageId" class="@Settings.CurrentTheme">
+<head>
+    <meta charset=" utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title> CRM </title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Basic Styles -->
+    @Styles.Render("~/content/smartadmin")
+</head>
+<body class="@ViewBag.PageClass @Settings.CurrentTheme">
+    <!-- HEADER -->
+    <header id="header">
+        <div id="logo-group">
+
+            <!-- PLACE YOUR LOGO HERE -->
+            <span id="logo"> <img src="~/Content/Uploads/Img/companyLogo/companyLogo.png" alt="SmartAdmin"> </span>
+            <!-- END LOGO PLACEHOLDER -->
+        </div>
+        <section id="top-right">
+            <div class="pull-right">
+            </div>
+        </section>
+    </header>
+    <!-- END HEADER -->
+    <div id="main" role="main">
+        <div id="content" class="container">
+            <div class="row">
+                <div class="col-md-offset-3 col-lg-offset-3 col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                    <div class="well no-padding">
+                        <form action="@Url.Action("login", "account")" method="POST" id="login-form" class="smart-form client-form">
+                            <header>
+                                @CRM.Application.Core.Resources.Administration.Login.SignIn
+                            </header>
+                            @Html.HiddenFor(m => m.ReturnUrl)
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationBootstrap()
+                            <fieldset>
+                                <section>
+                                    <label class="label">@CRM.Application.Core.Resources.Administration.Login.UserName</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-user"></i>
+                                        @Html.TextBoxFor(x => x.UserName, new { @placeholder = CRM.Application.Core.Resources.Administration.Login.UserName })
+                                        <b class="tooltip tooltip-top-right">
+                                            <i class="fa fa-user txt-color-teal"></i>
+                                            @Html.ValidationMessageFor(x => x.UserName)
+                                        </b>
+                                    </label>
+                                </section>
+
+                                <section>
+                                    <label class="label">@CRM.Application.Core.Resources.Administration.Login.Password</label>
+                                    <label class="input">
+                                        <i class="icon-append fa fa-lock"></i>
+                                        @Html.PasswordFor(x => x.Password, new { @placeholder = CRM.Application.Core.Resources.Administration.Login.Password })
+                                        <b class="tooltip tooltip-top-right">
+                                            <i class="fa fa-lock txt-color-teal"></i>
+                                            @Html.ValidationMessageFor(x => x.Password)
+                                        </b>
+                                    </label>
+                                </section>
+
+                                <section>
+                                    <label class="checkbox">
+                                        @Html.CheckBoxFor(x => x.RememberMe)
+                                        <i></i> @CRM.Application.Core.Resources.Administration.Login.StaySignedIn
+                                    </label>
+                                    @Html.ValidationMessage("LoginErrors")
+                                </section>
+                            </fieldset>
+                            <footer>
+                                <button type="submit" class="btn btn-primary">
+                                    @CRM.Application.Core.Resources.Administration.Login.SignIn
+                                </button>
+                            </footer>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

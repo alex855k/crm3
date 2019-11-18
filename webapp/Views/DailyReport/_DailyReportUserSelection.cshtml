@@ -1,0 +1,13 @@
+﻿@model CRM.Application.Core.ViewModels.DailyReportViewModel
+@{
+    Layout = null;
+}
+<span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+
+<select id="usersDropdown" class="form-control">
+    @foreach (var user in Model.UsersList)
+    {
+        <option value="@user.Id" @(Model.SelectedUserId == user.Id? "selected" : "" )>
+    @(string.Format("{0} {1}", user.FirstName, user.LastName))</option>
+    }
+</select>

@@ -1,0 +1,25 @@
+﻿@model CRM.Application.Core.ViewModels.DailyReportViewModel
+@{
+    Layout = null;
+}
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+@foreach (var report in Model.DailyReportList)
+{
+    <tr role="row" class="odd">
+        <td><a href="@Url.Action("TodayNotesReport",new {id=report.Id,date = report.Date })">@report.Date.ToString("dd/MM/yyyy")</a></td>
+        <td>@report.KmFrom</td>
+        <td>@report.KmTo</td>
+        <td>@(report.KmTo - @report.KmFrom)</td>
+        <td>
+            <a class="editDailyReport"
+               data-id="@report.Id"
+               data-date="@report.Date.ToString("dd/MM/yyyy")"
+               data-kmFrom="@report.KmFrom"
+               data-kmTo="@report.KmTo"
+               href="javascript:void(0)" title="Edit Daily Report"><i class="fa fa-pencil-square-o"></i></a>
+        </td>
+    </tr>
+}
+

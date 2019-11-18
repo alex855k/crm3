@@ -1,0 +1,23 @@
+﻿@model CRM.Application.Core.ViewModels.EmailMessageViewModel
+@{
+    Layout = null;
+}
+
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+
+@foreach (var em in Model.EmailMessagesPL)
+{
+    <tr role="row" class="odd">
+        @Html.HiddenFor(x => x.Id, new { @class="hiddenId" })
+        <td>@(em.DateSent.HasValue ? em.DateSent.ToString() : "")</td>
+        <td>@em.Subject</td>
+        <td>@em.Sender</td>
+        <td>@em.Recipients</td>
+        @*<td>@(emailMess.EmailAccountId.ToString("D4") + "-" + emailMess.MailBox_Uid.ToString("D6")))</td>@*accId zero padded + messId zero padded*@
+        <td>@em.CustomerCompanyName</td>
+        <td>@em.EmailAccount.HostName</td>
+        <td></td>
+    </tr>
+}

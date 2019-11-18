@@ -1,0 +1,1149 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using CRM.Application.Core.Resources.TimeRegistrations
+@using CRM.Application.Core.Resources.General
+@model CRM.Application.Core.ViewModels.CustomerCaseDatatableViewModel
+@{
+    Layout = null;
+}
+@Html.HiddenFor(x => x.CurrentUserID, new { id = "hiddenCurrentUserId" })
+<div id="datatable_fixed_column_wrapper" class="dataTables_wrapper form-inline no-footer">
+    <div class="dt-toolbar">
+        <div class="col-xs-12 col-sm-6 hidden-xs">
+            <div id="datatable_fixed_column_filter" class="dataTables_filter">
+                <label>
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+                    <input id="filterCases" type="search" class="form-control" placeholder="" aria-controls="datatable_fixed_column">
+                </label>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xs-12 hidden-xs">
+            <div class="toolbar">
+                <div class="text-right">
+                    <a id="createButton" class="btn btn-primary">@Customer.CreateCase</a>
+                    <a id="createCaseTypeButton" class="btn btn-info">@Customer.CreateCase @Customer.Type</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--table-->
+    <table id="example" class="display projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+        <thead>
+            <tr role="row">
+                <td class="sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 3px;"></td>
+                <th class="sorting_asc sort" data-sortByName="Titel" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending" style="width: 271px;">@Customer.Cases</th>
+                <th class="sorting sort" data-sortByName="PercentDone" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 72px;">
+                    <i class="fa fa-fw fa-user text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.ESTDoneShort
+                </th>
+                <th class="sorting sort" data-sortByName="User" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Case Responsible: activate to sort column ascending" style="width: 93px;">@Customer.CaseResponsible</th>
+                <th class="sorting " tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending" style="width: 58px;">@Customer.Status</th>
+                <th class="sorting sort" data-sortByName="ImportanceRank" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label=" Target/  Actual: activate to sort column ascending" style="width: 124px;">@Customer.Usedtime /(@Customer.Estimated)</th>
+                <th class="sorting sort" data-sortByName="StartDateTime" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label=" Starts: activate to sort column ascending" style="width: 71px;">
+                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Starts
+                </th>
+                <th class="sorting sort" data-sortByName="Deadline" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label=" Ends: activate to sort column ascending" style="width: 71px;">
+                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Deadline
+                </th>
+                <th class="details-control sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 22px;"><button id="caseTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>
+            </tr>
+        </thead>
+        <tbody id="customerCasesList">
+            @{Html.RenderPartial("_CustomerCasesList", Model);}
+        </tbody>
+    </table>
+    <div id="customerCasePaginationDiv">
+        @{Html.RenderPartial("_CustomerCasePagination", Model);}
+    </div>
+    <!--table-->
+</div>
+<div class="modal fade" id="caseModal" data-caseId="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{Html.RenderAction("CaseFormModal", "CustomerCases", new { customerId = Model.CustomerId });}
+</div>
+<div class="modal fade" id="TimeRegModal" data-caseId="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{Html.RenderAction("CaseTimeRegistrationModal", "CustomerCases", new { customerId = Model.CustomerId });}
+</div>
+
+<div class="modal fade" id="AssignmentModal" data-caseId="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{Html.RenderAction("AssignmentModal", "CustomerCases", new { customerId = Model.CustomerId });}
+</div>
+<div class="modal fade" id="caseTypeModal" data-caseId="" tabindex="-1" role="dialog">
+    @{Html.RenderAction("CaseTypeModal", "CustomerCases", new { customerId = Model.CustomerId });}
+</div>
+@{
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(Customer));
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(General));
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(TimeReg));
+}
+<script src="~/Scripts/moment/moment.min.js"></script>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<link href="~/Scripts/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/noUiSlider/nouislider.js"></script>
+<link href="~/Content/noUiSlider/css/nouislider.css" rel="stylesheet" />
+<script src="~/Scripts/CRM/Enum/SortDirection.js"></script>
+<link href="~/Content/Weekpicker/week-picker.css" rel="stylesheet" />
+<script src="~/Content/Weekpicker/week-picker.js"></script>
+<script src="~/Scripts/CRM/Cases/cases.js"></script>
+@*<script id="CustomerCaseScript" src="~/Scripts/CRM/Customers/CustomerCase.js"></script>*@
+
+<style>
+
+    .blue {
+        color: blue;
+    }
+
+    .bootstrap-datetimepicker-widget {
+        z-index: 1151 !important;
+    }
+
+    tbody tr[role='row'] {
+        cursor: pointer;
+    }
+
+    .redClass {
+        border-color: #9a0325 !important;
+        background: #a90329;
+    }
+
+    .greenClass {
+        background: #739e73 !important;
+        border-color: green !important;
+    }
+</style>
+<script type="text/javascript">
+
+    //#region outfactored
+    //=================INIT==================//
+    //#region INIT
+
+    function initializeSliders() {
+        $.each($(".listSlider"),
+            function(i, item) {
+                window[item.id] = document.getElementById(item.id);
+                let start = "0";
+                if ($(`#${item.id}`).attr("data-sliderVal") != null) {
+                    start = $(`#${item.id}`).attr("data-sliderVal");
+                };
+                noUiSlider.create(window[item.id],
+                    {
+                        start: [start],
+                        connect: [true, false],
+                        tooltips: [true],
+                        step: 1,
+                        range: {
+                            'min': [0],
+                            'max': [100]
+                        }
+
+                    });
+            });
+    }
+
+    $(document).ready(function() {
+        $("#timeRegStart").datetimepicker({
+            locale: "da",
+            sideBySide: true
+        });
+
+        $("#assignmentStart").datetimepicker({
+            locale: "da"
+        });
+        $("#assignmentDeadlineDate").datetimepicker({
+            locale: "da"
+        });
+
+        $("#assignmentDeadlineDate").on("dp.change",
+            function(e) {
+                $("#assignmentStart").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#assignmentStart").on("dp.change",
+            function(e) {
+                $("#assignmentDeadlineDate").data("DateTimePicker").minDate(e.date);
+            });
+
+        $("#timeRegEnd").datetimepicker({
+            locale: "da",
+            sideBySide: true
+        });
+
+        $("#timeRegEnd").on("dp.change",
+            function(e) {
+                $("#timeRegStart").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#timeRegStart").on("dp.change",
+            function(e) {
+                $("#timeRegEnd").data("DateTimePicker").minDate(e.date);
+            });
+
+        $("#caseStartDate").datetimepicker({
+            date: new Date(),
+            locale: "da"
+        });
+
+        $("#caseDeadlineDate").datetimepicker({
+            locale: "da"
+        });
+
+        $("#caseDeadlineDate").on("dp.change",
+            function(e) {
+                $("#caseStartDate").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#caseStartDate").on("dp.change",
+            function(e) {
+                $("#caseDeadlineDate").data("DateTimePicker").minDate(e.date);
+            });
+
+        $(`#estimatedTimeHour-spinner`).spinner({
+            step: 1.0,
+            numberFormat: "n",
+            min: 0
+        });
+        $(`#estimatedTimeMinute-spinner`).spinner({
+            step: 5.0,
+            numberFormat: "n",
+            min: 0,
+            max: 59
+        });
+        $(`#estimatedTimeHour-spinner`).parent().css("width", "58px");
+        $(`#estimatedTimeMinute-spinner`).parent().css("width", "58px");
+
+        initializeSliders();
+        //#endregion
+        //================INIT END===============//
+    });
+    var createSlider = document.getElementById('g1-div');
+    noUiSlider.create(createSlider,
+        {
+            start: [0],
+            connect: [true, false],
+            tooltips: [true],
+            step: 1,
+            range: {
+                'min': [0],
+                'max': [100]
+            }
+
+        });
+
+//===============Case===================//
+    //#region Case
+
+    $("#caseTableReload").click(function() {
+        reloadMainTable();
+    });
+
+    //opens case create modal
+    $("#createButton").click(function() {
+        emptyCreateModal();
+        $("#caseDeadlineDate").data("DateTimePicker").minDate(new Date());
+        $("#caseStartDate").data("DateTimePicker").date(new Date());
+        $("#caseStartDate").data("DateTimePicker").maxDate(new Date());
+        $("#Status").val('0');
+
+        $.ajax({
+            url: "/CustomerCases/GetCasePeople",
+            data: { "customerId": $("#hiddenCurrentCustomerId").val() },
+            success: function(data) {
+                $.each(data.UsersList,
+                    function(index, item) {
+                        var isCurrentUser = "";
+
+                        if ($("#hiddenCurrentUserId").val() === item.Id)
+                            isCurrentUser = "selected";
+                        $("#caseResponsible")
+                            .append(`<option value=${item.Id} selected=${isCurrentUser}>${item.FirstName}</option>`);
+                        $("#projectLeader")
+                            .append(`<option value=${item.Id} selected=${isCurrentUser}>${item.FirstName}</option>`);
+                    });
+                $.each(data.contactsList,
+                    function(index, item) {
+                        ;
+                        $("#contactPerson")
+                            .append(`<option value=${item.Id}>${item.Name}</option>`);
+                    });
+                $.each(data.CaseTypesList,
+                    function(index, item) {
+                        ;
+                        $("#caseTypes")
+                            .append(`<option value=${item.Id}>${item.TypeName}</option>`);
+                    });
+                $("#createModal").modal("show");
+            },
+            error: function(error) {
+            }
+        });
+    });
+
+    //Case Create modal Are you sure you want to close?
+    $("#createModal").on("hide.bs.modal",
+        function(e) {
+            ;
+            if (!jQuery.isEmptyObject($("#caseTitle").val()) || !jQuery.isEmptyObject($("#caseDescription").val())) {
+
+    //            let confirmMessage = $('<div/>').html("@Customer.RUSureClose").text();
+                if (!confirm(confirmMessage)) {
+                    return false;
+                } else {
+                    $("#createModal").attr("data-caseId", "");
+                }
+            }
+    });
+
+$(document).off("click", ".fa-thumb-tack");
+    //Pins Case
+$(document).on("click",".fa-thumb-tack",function () {
+        var pin = $(this);
+        $.ajax({
+            url: "/CustomerCases/PinToggle",
+            type: "Post",
+            data: { 'caseId': $(this).parent().attr("caseId") },
+            success: function (data) {
+                if ($(pin).hasClass("blue")) {
+                    $(pin).removeClass("blue");
+                } else {
+                    $(pin).addClass("blue");
+                }
+                toastr.success(data.responseText);
+            },
+            error: function (data) {
+                toastr.error("Pinning @Customer.failed");
+
+            }
+        });
+    });
+
+    //Gets detailed view for each case
+$(document).off("click", ".mainTable");
+$(document).on("click",".mainTable",function () {
+
+        const tr = $(this).parent()[0];
+        var id = $(tr).attr("caseid");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#${id}`).show();
+            $.ajax({
+                url: "/CustomerCases/GetDetailed",
+                data: { "caseId": id },
+                success: function (data) {
+                    ;
+                    if (data.CustomerContactId != null) {
+                        $(`#${id}-contact`).text(data.contact.Name);
+                    }
+                    $(`#${id}-startDate`).text(data.Started);
+                    if (data.Ended != null) {
+                        $(`#${id}-endDate`).text(data.Ended);
+                    }
+                    $(`#${id}-description`).text(data.Description);
+                    $(`#${id}-CaseId`).text(data.Id);
+                    $(`#${id}-slider`).slider("setValue", data.Done);
+                    $(`#${id}-slider`).css("margin-bottom", 0);
+                }
+            });
+        } else {
+            $(`#${id}`).hide();
+        }
+    });
+
+// Ends case
+$(document).off("click", ".endBtn");
+$(document).on("click", ".endBtn", function () {
+    const now = moment();
+    const caseId = parseInt($(this).attr("data-case-id"));
+    $.ajax({
+        url: "/CustomerCases/EndCase",
+        data: { CaseId: caseId, EndDateTime: now.toISOString() },
+            success: function (data) {
+                reloadMainTable(); //$("#customerCasesList").html(data);
+            },
+            error: function (data) {
+                toastr.error("@Customer.Ending @Customer.failed");
+
+        }
+    });
+});
+
+    // restarts case
+$(document).off("click", ".restartBtn");
+$(document).on("click",".restartBtn",function () {
+        const caseId = parseInt($(this).attr("data-case-id"));
+
+        $.ajax({
+            url: "/CustomerCases/RestartCase",
+            data: { CaseId: caseId },
+            success: function (data) {
+                reloadMainTable(); //$("#customerCasesList").html(data);
+            },
+            error: function (data) {
+                toastr.error("@Customer.Restarting @Customer.failed");
+
+            }
+        });
+    });
+$(document).off("click", "#estimatedSliderBtn");
+$(document).on("click","#estimatedSliderBtn",function () {
+        var caseId = $(this).attr("data-case-id");
+        var percentDone = parseInt(window[`listSlider_${caseId}`].noUiSlider.get());
+        $.ajax({
+            url: "/CustomerCases/UpdatePercentDone",
+            type: "Post",
+            data: { 'caseId': caseId, "PercentDone": percentDone },
+            success: function (data) {
+                toastr.success(data.responseText);
+
+                $(`#${caseId}-progressbar`).attr("data-progressbar-value", percentDone);
+            },
+            error: function (data) {
+                toastr.error("Pinning @Customer.failed");
+
+            }
+        });
+    });
+
+$(document).off("click", "#yearOutBtn");
+$(document).on("click","#yearOutBtn",function () {
+        $("#caseDeadlineDate").data("DateTimePicker").date(moment("31-12", "DD-MM"));
+    });
+
+//#endregion
+    //===============Case END================//
+
+    //============Case Assignments==========//
+    //#region Case Assignments
+    //This region has been moved to _AssignmentModal.cshtml -embn
+    //#endregion
+    //============Case Assignments END=======//
+
+    //===============Time Reg===============//
+    //#region TimeReg
+    //Open and closes TimeReg
+    $(document).off("click", ".TimeReg");
+        $(document).on("click", ".TimeReg", function() {
+                const tr = $(this).parent()[0];
+                const id = $(tr).attr("data-caseid");
+                $(tr).toggleClass("shown");
+                if ($(tr).hasClass("shown")) {
+                    $(`#timeReg${id}`).show();
+                } else {
+                    $(`#timeReg${id}`).hide();
+                }
+            });
+
+        // Opens Timereg Modal
+    $(document).off("click", ".timeRegBtn");
+    $(document).on("click", ".timeRegBtn", function () {
+        const caseId = $(this).attr("data-case-id");
+        $("#TimeRegModal").modal("show");
+        $("#TimeRegModal").attr("data-caseId", caseId);
+        getTimeRegtable(caseId);
+        $("#timeregTableReload").attr("data-caseId", caseId);
+        getAssignmentsDropdown(caseId, $("#timeRegAssignment"));
+    });
+
+    $(document).on("click", "#timeregTableReload", function ()
+    {
+        let caseId = $("#timeregTableReload").attr("data-caseId");
+        getTimeRegtable(parseInt(caseId));
+    });
+
+    function getTimeRegtable(caseId) {
+        $("#timeRegTBody").empty();
+        $.ajax({
+            url: "/CustomerCases/GetCaseTimeRegs",
+            data: { 'caseId': caseId },
+            dataType: "json",
+            success: function (data) {
+                $.each(data.TimeRegsList,
+                    function (i, item) {
+                        var caseAssignmentTitle = "None";
+                        if (item.CaseAssignment != null) {
+                            caseAssignmentTitle = item.CaseAssignment.Title;
+                        };
+                        $("#timeRegTable").append(
+                            `<tr data-caseid="${item.Id}" @*role="row"*@ class="TimeRegRemove${item.Id} even expandCollapseDetails">
+                                    <td id="timeregDateTime-start-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                    <td id="timeregDateTime-end-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                    <td>${item.User.FirstName} ${item.User.LastName}</td>
+                                    <td id="${item.Id}-interval">${moment.duration(item.Interval).format("hh:mm", { trim: false })}</td>
+                                    <td style="width: 15px" class="details-control TimeReg"></td>
+
+                                    <tr class="TimeReg TimeRegRemove${item.Id}" id="timeReg${item.Id}" style="display: none"><td colspan="6">
+                                        <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                            <tbody>
+                                                <tr>
+                                                //    <td>@Customer.Assignment:</td>
+                                                    <td style="max-width:150px; word-wrap:break-word" id="${item.Id}-assignment" data-editable-${item.Id}>${caseAssignmentTitle}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>@TimeReg.Description:</td><td style="max-width:150px; word-wrap:break-word" id="timeregDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="${item.Id}-actions">
+                                                        //<button id="${item.Id}-editTimeRegBtn" style="margin-right: 10px" data-timeReg-id="${item.Id}" class="btn btn-xs editTimeRegBtn btn-info pull-left">@TimeReg.Edit</button>
+                                                        //<button id="${item.Id}-DeleteBtn" data-timeReg-id="${item.Id}" class="btn btn-xs deleteTimeRegBtn btn-danger pull-left">@TimeReg.Delete</button>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                </tr>`);
+                    });
+            },
+            error: function () {
+                toastr.error("Could not fetch Time Registration");
+            }
+        });
+    }
+
+    //saves new Timereg
+    $("#saveTimeRegBtn").click(function() {
+        var $btn = $(this).button("loading");
+        var caseId = $("#TimeRegModal").attr("data-caseId");
+        var startTime = $("#timeRegStart").data("DateTimePicker").date().toISOString();
+        var endTime = $("#timeRegEnd").data("DateTimePicker").date().toISOString();
+        const timeReg = {
+            "Id": null,
+            "startTime": $("#timeRegStart").data("DateTimePicker").date().toISOString(),
+            "endTime": $("#timeRegEnd").data("DateTimePicker").date().toISOString(),
+            "CustomerCaseId": caseId,
+            "CaseAssignmentId": $("#timeRegAssignment").val(),
+            "Description": $("#timeRegDescription").val(),
+            "Title": $("#timeRegTitle").val(),
+            "UserId": $("#hiddenCurrentUserId").val()
+        };
+        $.ajax({
+            url: "/CustomerCases/CreateTimeReg",
+            type: "Post",
+            data: { 'timeReg': timeReg, "startTime": startTime, "endTime": endTime },
+            success: function(data) {
+
+                const oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+                const newTimeEstimate = oldTimeEstimate.add(moment.duration(moment(endTime).diff(moment(startTime))));
+                $(`#${caseId}-TotalTimeUsed`).text(`${moment.duration(newTimeEstimate).format("HH:mm", { trim: false })}`);
+
+                $btn.button("reset");
+
+            //    toastr.success("@TimeReg.Saved");
+                getTimeRegtable($("#TimeRegModal").attr("data-caseId"));
+                clearTimeRegModal();
+
+            },
+            error: function() {
+                $btn.button("reset");
+            //    toastr.error("@TimeReg.Saving @Customer.failed");
+            }
+        });
+    });
+
+    //clears modal when closed
+    $("#TimeRegModal").on("hidden.bs.modal", function() {
+            $("#TimeRegModal").attr("data-caseId", "");
+            clearTimeRegModal();
+    });
+
+    // Timereg Are you sure you want to close?
+    $("#TimeRegModal").on("hide.bs.modal", function (e) {
+        if (!jQuery.isEmptyObject($("#timeRegTitle").val()) ||
+        !jQuery.isEmptyObject($("#timeRegDescription").val())) {
+
+    //        if (!confirm("@Customer.RUSureClose")) return false;
+            };
+});
+
+    function clearTimeRegModal() {
+
+        $("#timeRegTitle").val("");
+        $("#timeRegDescription").val("");
+        $("#timeRegStart").val("");
+        $("#timeRegEnd").val("");
+        $("#timeRegAssignment").empty();
+        $("#timeRegTBody").empty();
+    }
+
+    // Deletes a timereg
+$(document).off("click", ".deleteTimeRegBtn");
+    $(document).on("click",".deleteTimeRegBtn",
+        function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var caseId = $("#TimeRegModal").attr("data-caseId");
+            var oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+            $.SmartMessageBox({
+                    //title: "@TimeReg.Delete?",
+                    content: "@TimeReg.RUSure @TimeReg.TimeRegistration",
+                    //buttons: "[@TimeReg.No/*][*/@TimeReg.Yes]"
+                },
+                function(ButtonPressed) {
+                    if (ButtonPressed === "@TimeReg.Yes") {
+
+                        $.ajax({
+                            url: "/CustomerCases/DeleteTimeReg",
+                            data: { timeRegId: timeRegId },
+                            success: function(data) {
+                                $(`.TimeRegRemove${timeRegId}`).fadeOut(300, function() { $(this).remove(); });
+
+                                const newTimeEstimate =
+                                    oldTimeEstimate.subtract(moment.duration($(`#${timeRegId}-interval`).text()));
+                                $(`#${caseId}-TotalTimeUsed`)
+                                    .text(`${moment.duration(newTimeEstimate).format("HH:mm", { trim: false })}`);
+                            },
+                            error: function(data) {
+                                toastr.error("Delete failed");
+
+                            }
+                        });
+                    }
+                    if (ButtonPressed === "@TimeReg.No") {
+                        $.smallBox({
+                            iconSmall: "fa fa-times fa-2x fadeInRight animated",
+                            timeout: 4000
+                        });
+                    }
+                }
+            );
+
+        });
+
+    //Makes it so a user can edit a timereg
+$(document).off("click", ".editTimeRegBtn");
+    $(document).on("click",".editTimeRegBtn",function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var $el = $(`[data-editable-${timeRegId}]`);
+            $(this).replaceWith(
+                `<button id="${timeRegId}-saveTimeRegBtn" style="margin-right: 10px" data-timeReg-id="${timeRegId
+                //}" class="btn btn-xs editSaveTimeRegBtn btn-success pull-left">@TimeReg.Save</button>
+                //<button id="${timeRegId}-cancelTimeRegBtn" data-timeReg-id="${timeRegId}" style="margin-right: 10px" class="btn btn-xs cancelTimeRegBtn btn-normal pull-left">@TimeReg.Cancel</button>`);
+            $.each($el,
+                function(i, item) {
+                    const $width = $($el[i]).width();
+                    const $id = $($el[i]).prop("id");
+                    if ($id === `${timeRegId}-assignment`) {
+                        $(item).attr(`data-saveable-${timeRegId}`, "");
+                        $(item).removeAttr(`data-editable-${timeRegId}`);
+                        const content = $("#timeRegAssignment").clone();
+                        $(`#${timeRegId}-assignment`).empty();
+                        $(`#${timeRegId}-assignment`).append(content);
+                    } else {
+                        const $td = $(`<td style='width: ${$width}px'> </td>`);
+                        const $input =
+                            $(`<input class="form-control datepicker" id="${$id}" data-saveable-${timeRegId} style="width:${$width
+                                }px"/>`).val($(item).text());
+
+                        $($td).append($input);
+                        $(item).replaceWith($td);
+                    }
+                });
+            $(`#timeregDateTime-start-${timeRegId}`).datetimepicker({
+                locale: "da",
+                sideBySide: true
+            });
+
+            $(`#timeregDateTime-end-${timeRegId}`).datetimepicker({
+                locale: "da",
+                sideBySide: true,
+            });
+
+        $(`#timeregDateTime-end-${timeRegId}`).on("dp.change",
+            function (e) {
+
+                $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").maxDate(e.date);
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date()
+                    .toISOString();
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${timeRegId}-interval`).text(moment
+                    .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds())
+                    .format("HH:mm"));
+            });
+
+        $(`#timeregDateTime-start-${timeRegId}`).on("dp.change",
+            function (e) {
+                $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").minDate(e.date);
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date()
+                    .toISOString();
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${timeRegId}-interval`).text(moment
+                    .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds())
+                    .format("HH:mm"));
+            });
+        });
+
+    //returns the timereg to normal
+$(document).off("click", ".cancelTimeRegBtn");
+    $(document).on("click",".cancelTimeRegBtn",function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var $el = $(`[data-saveable-${timeRegId}]`);
+            $(this).replaceWith(
+                `<button id="${timeRegId}-editTimeRegBtn" data-timeReg-id="${timeRegId
+                }" class="btn btn-xs editTimeRegBtn btn-info pull-left">@Customer.Edit</button> `);
+            $(`#${timeRegId}-saveTimeRegBtn`).remove();
+
+            $.each($el,
+                function(i, item) {
+                    const $id = $($el[i]).prop("id");
+                    if ($id === `${timeRegId}-assignment`) {
+                        const selected = $(item).children().find(":selected").text();
+                        $(`#${timeRegId}-assignment`).empty();
+                        $(`#${timeRegId}-assignment`).append(selected);
+                        $(item).attr(`data-editable-${timeRegId}`, "");
+                        $(item).removeAttr(`data-saveable-${timeRegId}`);
+
+                    } else {
+
+                        const $td = $(`<td data-editable-${timeRegId} id=${$id}>${$(item).val()} </td>`);
+
+                        $(item).parent().replaceWith($td);
+                    }
+
+            });
+            $.ajax({
+                url: "/Timeregistration/GetTimeReg",
+                type: "Get",
+                data: { "TimeRegId": timeRegId },
+                success: function (data) {
+                    const timeStart = new Date(parseInt((data.TimeReg.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                    const timeEnd = new Date(parseInt((data.TimeReg.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                    $(`#timeregDateTime-start-${timeRegId}`).text(
+                        moment(timeStart)
+                        .format("DD.MM.YYYY HH:mm"));
+                    $(`#timeregDateTime-end-${timeRegId}`)
+                        .text(moment(timeEnd)
+                            .format("DD.MM.YYYY HH:mm"));
+
+                    $(`#${timeRegId}-interval`).text(moment
+                        .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds())
+                        .format("HH:mm"));
+
+                    $(`#${timeRegId}-assignment`).text(data.CaseAssignment.Title);
+                    $(`#timeregDescription-${timeRegId}`).text(data.Description);
+                },
+                error: function (data) {
+                    toastr.error("Error");
+                }
+        });
+        });
+
+    //Saves the edited timereg
+    $(document).off("click", ".editSaveTimeRegBtn");
+    $(document).on("click",".editSaveTimeRegBtn",
+        function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var $el = $(`[data-saveable-${timeRegId}]`);
+            $(this).replaceWith(`<button id="${timeRegId}-editTimeRegBtn" data-timeReg-id="${timeRegId
+               }" class="btn btn-xs editTimeRegBtn btn-info pull-left">@Customer.Edit</button> `);
+            $(`#${timeRegId}-cancelTimeRegBtn`).remove();
+
+            const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date().toISOString();
+            const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+            const assignmentId = $(`#${timeRegId}-assignment`).children().find(":selected").val();
+            $(`#${timeRegId}-interval`).text(moment
+                .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds()).format("HH:mm"));
+            $.each($el,
+                function(i, item) {
+                    const $id = $($el[i]).prop("id");
+                    if ($id === `${timeRegId}-assignment`) {
+                        const selected = $(item).children().find(":selected").text();
+                        $(`#${timeRegId}-assignment`).empty();
+                        $(`#${timeRegId}-assignment`).append(selected);
+                        $(item).attr(`data-editable-${timeRegId}`, "");
+                        $(item).removeAttr(`data-saveable-${timeRegId}`);
+                    } else {
+                        const $td = $(`<td data-editable-${timeRegId} id=${$id}>${$(item).val()} </td>`);
+
+                        $(item).parent().replaceWith($td);
+                    }
+                });
+
+            const timeReg = {
+                "Id": timeRegId,
+                "Description": $(`#timeregDescription-${timeRegId}`).text(),
+                "CaseAssignmentId": parseInt(assignmentId),
+                "StartDateTime": timeStart,
+                "EndDateTime": timeEnd,
+            };
+            $.ajax({
+                url: "/CustomerCases/TimeRegEdit",
+                type: "Post",
+                data: { "timeReg": timeReg },
+                success: function(data) {
+                    toastr.success("Success");
+                },
+                error: function(data) {
+            //        toastr.error("@Customer.Edit @Customer.failed");
+
+                }
+            });
+
+        });
+
+
+    //#endregion
+    //===============TimeReg End============//
+
+    //===============Casetype=================//
+    //#region CaseType
+$(document).off("click", ".CaseType");
+$(document).on("click", ".CaseType", function () {
+    const tr = $(this).parent()[0];
+    const id = $(tr).attr("data-CaseTypeId");
+    $(tr).toggleClass("shown");
+    if ($(tr).hasClass("shown")) {
+        $(`#CaseType${id}`).show();
+    } else {
+        $(`#CaseType${id}`).hide();
+    }
+});
+
+$("#createCaseTypeButton").click(function() {
+    $("#caseTypeModal").modal("show");
+    getUsersNames($("#repeatPlanner"));
+    getCaseTypeTable();
+});
+
+$("#repeats").click( function () {
+    if ($("#repeats").prop("checked")) {
+        $("#repeatDiv").fadeIn(200,
+            function() {
+                $("#repeatDiv").css("display", "block");
+            });
+    } else {
+        $("#repeatDiv").fadeOut(200, function () { $("#repeatDiv").css("display", "none")});
+    }
+
+});
+
+function getCaseTypeTable() {
+    $("#caseTypeTBody").empty();
+
+    $.ajax({
+        url: "/CustomerCases/GetCaseTypeTable",
+        data: {},
+        dataType: "json",
+        success: function(data) {
+
+            //Active Assignment List
+            $.each(data.CaseTypeList,
+                function(i, item) {
+                    var repeatTR;
+                    var invoiced;
+                    var repeats;
+                    var prettyRepeat;
+                    if (item.Invoiced) {
+                        invoiced = '<i style= "color:green" class="fa fa-check"></i>';
+                    } else {
+                        invoiced = '<i style= "color:red" class="fa fa-times"></i>';
+                    }
+                    if (item.Repeats) {
+                        switch (item.RepeatsSpanIsoString) {
+                            case"P1D" :
+                            //    prettyRepeat = "@Customer.P1D";
+                            case "P2D":
+                                prettyRepeat = "@Customer.P2D";
+                            case "P7D":
+                                prettyRepeat = "@Customer.P7D";
+                            case "P14D":
+                                prettyRepeat = "@Customer.P14D";
+                            case "P1M":
+                                prettyRepeat = "@Customer.P1M";
+                            case "P2M":
+                                prettyRepeat = "@Customer.P2M";
+                            case "P3M":
+                                prettyRepeat = "@Customer.P3M";
+                            case "P4M":
+                                prettyRepeat = "@Customer.P4M";
+                            case "P6M":
+                                prettyRepeat = "@Customer.P6M";
+                            case "P1Y":
+                                prettyRepeat = "@Customer.P1Y";
+                            case "P2Y":
+                                prettyRepeat = "@Customer.P2Y";
+                            case "P3Y":
+                            //    prettyRepeat = "@Customer.P3Y";
+                        }
+                        repeats = '<i style= "color:green" class="fa fa-check"></i>';
+                        repeatTR = `<tr>
+                                    //    <td>@Customer.WhoPlansTheRepeat:</td>
+                                        <td data-value="${item.UserId}" style="max-width:150px; word-wrap:break-word" id="${item.Id}-repeatsPlanner" data-editable-${item.Id}>${item.User.FirstName} ${item.User.LastName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>@Customer.Repeats:</td>
+                                        <td>${prettyRepeat}</td>
+                                    </tr>
+                                    <tr>
+                                    //    <td><i class="fa fa-bell"></i> @Customer.daysBeforeRepeat:</td>
+                                        <td>${moment.duration(item.DaysBeforeIsoString).asDays()}</td>
+                                    </tr>`;
+                    } else {
+                        repeats = '<i style= "color:red" class="fa fa-times"></i>';
+                    }
+                    $("#caseTypeTable").append(
+                        `<tr data-caseid="${item.Id}" data-CaseTypeId="${item.Id}" class="CaseTypeRemove${item.Id} even expandCollapseDetails">
+                                    <td style="max-width:150px; word-wrap:break-word" id="CaseTypeTitle-${item.Id}" data-editable-${item.Id} style="display: block;">${item.TypeName}</td>
+                                    <td data-editable-${item.Id} id="${item.Id}-repeats" data-repeats=${item.Repeats}>${repeats}</td>
+                                    <td data-editable-${item.Id} id="${item.Id}-invoiced" data-invoiced=${item.Invoiced}>${invoiced}</td>
+
+                                    <td style="width: 15px"  data-id="CaseType${item.Id}" class="details-control CaseType"></td>
+
+                                    <tr class="CaseType CaseTypeRemove${item.Id}" id="CaseType${item.Id}" style="display: none"><td colspan="6">
+                                            <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                                <tbody>
+
+                                                    <tr>
+                                                    //    <td>@Customer.Description:</td>
+                                                        <td style="max-width:150px; word-wrap:break-word" id="CaseTypeDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                                    </tr>
+                                                    ${repeatTR}
+                                                    <tr>
+                                                        <td id="${item.Id}-CaseTypesActions">
+                                                            //<!--<button id="${item.Id}-editCaseTypeBtn" style="margin-right: 10px" data-CaseType-id="${item.Id}" class="btn btn-xs editCaseTypeBtn btn-info pull-left">@Customer.Edit</button>
+                                                            //<button id="${item.Id}-DeleteBtn" data-CaseType-id="${item.Id}" class="btn btn-xs deleteCaseTypeBtn btn-danger pull-left">@TimeReg.Delete</button>-->
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tr>`);
+                }
+            );
+
+        },
+        error: function() {
+            toastr.error("Could not fetch CaseTypes");
+        }
+    });
+}
+
+$("#saveCaseTypeBtn").click(function () {
+    var $btn = $(this).button("loading");
+    const caseType = {
+        "Id": null,
+        "TypeName": $("#typeName").val(),
+        "Description": $("#CaseTypeDescription").val(),
+        "Repeats": $("#repeats").prop("checked"),
+        "Invoiced": $("#invoiced").prop("checked"),
+        "RepeatsSpanIsoString": $("#repeatDate").val(),
+        "UserId": $("#repeatPlanner").val(),
+        "DaysBeforeIsoString": $("#planedDaysBefore").val()
+    };
+    $.ajax({
+        url: "/CustomerCases/CreateCaseType",
+        data: caseType,
+        type: "Post",
+        success: function (data) {
+
+            $btn.button("reset");
+
+        //    toastr.success("@TimeReg.Saved");
+            getCaseTypeTable();
+            clearCaseTypeModal();
+
+        },
+        error: function () {
+            $btn.button("reset");
+        //    toastr.error("@TimeReg.Saving @Customer.failed");
+        }
+    });
+});
+
+//clears modal when closed
+$("#caseTypeModal").on("hidden.bs.modal", function () {
+    clearCaseTypeModal();
+});
+
+function clearCaseTypeModal() {
+    $("#typeName").val("");
+    $("#CaseTypeDescription").val("");
+    $("#repeats").prop("checked", false);
+    $("#invoiced").prop("checked", false);
+    $("#repeatDate").empty();
+    $("#CaseTypeTBody").empty();
+}
+
+//#endregion
+    //===============Casetype END=================//
+
+    //===============Generic=================//
+    //#region Generic
+    function getAssignmentsDropdown(caseId, el) {
+        el.append(`<option value=${null}>@Customer.None</option>`);
+
+        $.ajax({
+            url: "/CustomerCases/GetCaseAssignments",
+            data: { caseId: caseId },
+            success: function(data) {
+                debugger
+
+                $.each(data.AssignmentsList,
+                    function(index, item) {
+                        el.append(`<option value=${item.Id}>${item.Title}</option>`);
+                    });
+            },
+            error: function (error) {
+                debugger;
+            }
+        });
+    }
+
+//Table Filter sort pagination
+
+    $(".sort").click(function() {
+        var newSort = "";
+        const currentClass = $(this).attr("class");
+        const orderBy = $(this).attr("data-sortByName");
+        const currentSort = currentClass.substr(currentClass.indexOf(" ")).trim();
+        if (currentSort == SortDirection.Asc) {
+            newSort = SortDirection.Desc;
+            $("#hiddenOrderBy").val(orderBy);
+            $("#hiddenDirection").val("Desc");
+        }
+        else {
+            newSort = SortDirection.Asc;
+            $("#hiddenOrderBy").val(orderBy);
+            $("#hiddenDirection").val("Asc");
+        }
+        $(".sort").removeClass("sorting_asc").removeClass("sorting_desc").removeClass("sorting");
+        $(".sort").not(this).addClass("sorting");
+        $(this).addClass(newSort);
+        Search(true, null);
+    });
+    $("#filterCases").keyup(function() { //TODO: Manipulate desc asc for all the others. And find which to order by.
+
+        clearTimeout($.data(this, "timer"));
+        $(this).data("timer", setTimeout(Search(true, null), 500));
+});
+var pageNumber;
+$(document).on("click", ".LiPager", function (e) {
+        e.preventDefault();
+        pageNumber = $(this).children().attr("data-pagenumber");
+        const currentPageNumber = $(this).siblings(".active").children().attr("data-pagenumber");
+        if (pageNumber == "@Customer.Next") {
+            pageNumber = String(parseInt(currentPageNumber) + 1);
+        } else if (pageNumber == "@Customer.Previous") {
+            pageNumber = String(parseInt(currentPageNumber) - 1);
+        }
+        Search(true, parseInt(pageNumber));
+    });
+
+    function Search(sort, direction, page) {
+
+        const searchObject = {};
+        const SearchParams = [];
+        const searchParamsObj = {};
+        const defaultSort = $(".defaultSort").attr("data-searchKey");
+        var currentPageNumber = "";
+        if (pageNumber != "" && pageNumber != undefined && pageNumber != null)
+            currentPageNumber = pageNumber;
+        else
+            currentPageNumber = $(".pagination").children().children().attr("data-pagenumber");
+        if ($("#filterCases").val() != "") {
+            searchObject.SearchKey = $("#filterCases").val();
+        }
+        searchObject.CustomerId = $("#hiddenCurrentCustomerId").val();
+        searchObject.PageNumber = parseInt(currentPageNumber);
+        searchObject.DefaultOrderBy = defaultSort;
+        searchObject.OrderBy = $("#hiddenOrderBy").val();
+        searchObject.Direction = $("#hiddenDirection").val();
+        searchObject.IsCustomers = $("#hiddenIsCustomers").val();
+        $.ajax({
+            url: "/CustomerCases/FilterAndSearch",
+            data: { "CustomerCaseDatatableViewModel": searchObject },
+            type: "POST",
+            success: function(data, textStatus, jqXHR) {
+                $("#customerCasesList").html(data.tablePartial);
+                $("#customerCasePaginationDiv").html(data.pagingPartial);
+                initializeSliders();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+    //            toastr.error("@Customer.failed");
+            }
+        });
+    }
+function showCaseDetails(data) {
+    let detailsRow = `
+        <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+            <thead>
+                 <input type="hidden" name="custId" value="${data.CustomerId}">
+            </thead>
+            <tbody>
+            <tr>
+                <td>@Customer.Casenumber:</td>
+                <td style="max-width:150px; word-wrap:break-word" id="${data.Id}-CaseId"></td>
+                <td></td>
+            </tr>
+            <tr>
+                    <td>@Customer.Contact:</td>
+                    <td style="max-width: 150px; word-wrap: break-word" id="${data.Id}-contact"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>@Customer.Started:</td>
+                    <td id="${data.Id}-startDate"></td>
+                    <td></td>
+                </tr>`;
+    if (data.Done === 100) {
+        detailsRow += `<tr>
+                <td>@Customer.Ended:</td>
+                <td id="${data.Id}-endDate"></td>
+                <td></td>
+            </tr>`;
+    }
+    detailsRow += `<tr>
+                    <td>@Customer.Description:</td>
+                    <td style="max-width: 150px; word-wrap: break-word" id="${data.Id}-description">This is a blank comments area, used to add comments and keep notes</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle">@Customer.ESTDoneLong:</td>
+                    <td style="vertical-align:middle">
+                        <div class="listSlider" style="margin-top: 5px; margin-bottom: 5px;" data-sliderVal="${data.PercentDone}" id="listSlider_${data.Id}">
+
+                        </div>
+                    </td>
+                    <td style="vertical-align:middle"><button id="estimatedSliderBtn" data-case-id="${data.Id}" class="btn btn-xs btn-info pull-right">@Customer.Save</button></td>
+                </tr>
+                <tr>
+                    <td>@Customer.Actions:</td>
+                    <td id="${data.Id}-actions">
+                        <button id="${data.Id}-editBtn" data-case-id="${data.Id}" data-customer-id="${data.CustomerId}" class="btn btn-xs editBtn btn-info pull-left">@Customer.Edit</button>`;
+
+    if (data.Done === 100) {
+        detailsRow += `<button id="${data.Id}-restartBtn" data-case-id="${data.Id}" class="btn btn-xs restartBtn btn-warning pull-left">@Customer.Restart</button>`;
+    }
+    else {
+        detailsRow += `<button id="${data.Id}-endBtn" data-case-id="${data.Id}" class="btn btn-xs endBtn btn-warning pull-left">@Customer.End</button>`;
+    }
+
+    detailsRow +=
+        `<button id="drivingRegBtn-${data.Id}" data-case-id="${data.Id}" class="drivingRegBtn btn btn-xs btn-basic pull-right">@Customer.DrivingRegistration</button>
+             <button id="timeRegBtn-${data.Id}" data-case-id="${data.Id}" class="timeRegBtn btn btn-xs btn-info pull-right">@Customer.TimeRegistration</button>
+
+                        <button id="assignmentsBtn" data-case-id=${data.Id} class="btn btn-xs assignmentsBtn btn-success pull-right">@Customer.Assignments</button>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>`;
+    return detailsRow;
+}
+function reloadMainTable(e) {
+    Search(true, null);
+}
+//#endregion
+//    ===============Generic END=============//
+//#endregion
+
+</script>
+@*@if (!AuthorizationService.AuthorizeRenderHTML("Edit", "CustomerCases"))
+{
+    <script>
+        $(document).ready(function () {
+            $("._popup").remove();
+        });
+    </script>
+}*@

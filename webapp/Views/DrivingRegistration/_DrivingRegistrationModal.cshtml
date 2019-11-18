@@ -1,0 +1,71 @@
+﻿@using Microsoft.AspNet.Identity
+@using CRM.Application.Core.Resources.DrivingRegistrations
+
+@model CRM.Application.Core.ViewModels.CustomerCaseViewModel
+@{
+    Layout = null;
+}
+<div class="modal-dialog modal-md">
+    <div class="modal-content" id="modalContent">
+        <div style="background: dodgerblue;" class="modal-header">
+            <button style="color: white" type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                &times;
+            </button>
+            <h4 class="modal-title" style="color: white" id="myModalLabel">@DrivingReg.DrivingRegistrations</h4>
+        </div>
+        <div class="modal-body">
+            @{Html.RenderAction("DrivingRegistrationForm", "DrivingRegistration");}
+
+            @*<div style="max-height: 300px; padding-bottom: 15px; width:auto; overflow:auto;" >*@
+            @*<div style="padding-right:0px" class="row col-md-12">*@
+            @{Html.RenderAction("DrivingRegistrationList", "DrivingRegistration");}
+
+            @*</div>*@
+            @*</div>*@
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<link href="~/Scripts/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/moment.min.js"></script>
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    $(document).off("click", "#DrivingRegBtn");
+    $(document).on("click", "#DrivingRegBtn", function () {
+        $("#DrivingRegModal").modal("show");
+        $("#DrivingRegModal").attr("data-caseId", $(this).attr("data-case-id"));
+        getDrivingRegtable($("#hiddenUserId").val());
+        //$("#DrivingRegTableReload").attr("data-caseId", id);
+    });
+
+    //clears modal when closed
+    $("#DrivingRegModal").on("hidden.bs.modal", function() {
+        $("#DrivingRegModal").attr("data-caseId", "");
+        clearDrivingRegModal();
+    });
+
+    // DrivingReg Are you sure you want to close?
+    $("#DrivingRegModal").on("hide.bs.modal", function (e) {
+        if (!jQuery.isEmptyObject($("#DrivingRegTitle").val()) ||
+            !jQuery.isEmptyObject($("#DrivingRegDescription").val())) {
+
+            if (!confirm("Are you sure, you want to close?")) return false;
+        };
+    });
+
+    function clearDrivingRegModal() {
+
+        if (typeof clearDrivingRegForm === "function") {
+            clearDrivingRegForm();
+        }
+        if (typeof clearDrivingRegList === "function") {
+            clearDrivingRegList();
+        }
+    }
+   
+</script>

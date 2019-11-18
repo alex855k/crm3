@@ -1,0 +1,28 @@
+﻿@model IEnumerable<CRM.Application.Core.ViewModels.TimeRegistrationViewModel>
+@{
+    Layout = null;
+}
+
+<article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+    <div style="display:block; background-color: #45474b; height: 30px;">
+        <div class="container" style="padding-top: 5px; width: 100%;">
+            <div class="row align-middle">
+                @if (!Model.Any())
+                {
+                    <div style="color:white; width:auto;" class="col-sm-1">
+                        @CRM.Application.Core.Resources.TimeRegistrations.TimeReg.NoTimeRegsThisWeek
+                    </div>
+                }
+                @foreach (var user in Model)
+                {
+                    <div style="color:white; width:auto;" data-UserId="@user.UserId" class="col-sm-1">
+                        @string.Format("{0}  FT: {1} IFT: {2}",
+                            user.FirstName,
+                            user.InvoiceableTime.ToString(@"hh\:mm"),
+                            user.NonInvoiceableTime.ToString(@"hh\:mm"))
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</article>

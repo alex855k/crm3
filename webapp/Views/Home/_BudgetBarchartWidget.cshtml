@@ -1,0 +1,51 @@
+﻿@{
+    Layout = null;
+}
+
+<!-- NEW WIDGET START -->
+<article class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+
+    <!-- Widget ID (each widget will need unique ID)-->
+    <div class="jarviswidget" id="wid-id-2" data-widget-colorbutton="false" data-widget-fullscreenbutton="false" data-widget-editbutton="false" data-widget-sortable="false">
+        <!-- widget options:
+            usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+            data-widget-colorbutton="false"
+            data-widget-editbutton="false"
+            data-widget-togglebutton="false"
+            data-widget-deletebutton="false"
+            data-widget-fullscreenbutton="false"
+            data-widget-custombutton="false"
+            data-widget-collapsed="true"
+            data-widget-sortable="false"
+
+        -->
+        <header>
+
+            <h2>@CRM.Application.Core.Resources.Budget.Budget.BudgetTitle </h2>
+
+        </header>
+
+        <!-- widget div-->
+        <div>
+
+            <!-- widget edit box -->
+            <div class="jarviswidget-editbox">
+                <!-- This area used as dropdown edit box -->
+                <input class="form-control" type="text">
+            </div>
+            <!-- end widget edit box -->
+            <!-- widget content -->
+            <div class="widget-body">
+
+                <!-- this is what the user will see -->
+                <canvas id="barChart" height="120"></canvas>
+
+            </div>
+            <!-- end widget content -->
+        </div>
+        <!-- end widget div -->
+    </div>
+</article>
+<!-- WIDGET END -->
+<script src="~/Scripts/CRM/BudgetBarChart/BarChartWidget.js"></script>

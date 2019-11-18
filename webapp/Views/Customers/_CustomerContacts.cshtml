@@ -1,0 +1,11 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerContactsViewModel
+
+@{
+    Layout = null;
+}
+<div id="customerContactsFormDiv">
+    @{Html.RenderAction("CustomerContactsForm", "Customers", new { @customerId = Model.CustomerId });}
+</div>
+<div id="customerContactsListDiv">
+    @{Html.RenderAction("CustomerContactsList", "Customers", new { @customerId = Model.CustomerId });}
+</div>

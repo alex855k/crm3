@@ -1,0 +1,152 @@
+﻿@model CRM.Application.Core.ViewModels.ProcedureViewModel
+<form id="createProcedureForm" class="smart-form" enctype="multipart/form-data">
+    @Html.HiddenFor(x => x.Id, new { @id = "ProcedureId" })
+    <fieldset>
+        <div class="row">
+            <section class="col col-6">
+                <label for="title" class="input">
+                    @Html.TextBoxFor(x => x.Title, new { @placeholder = "Title", @id = "Title" })
+                </label>
+                @Html.ValidationMessageFor(x => x.Title, null, new { @class = "invalid validation" })
+            </section>
+        </div>
+        @if (Model.ImagePath != null && Model.ImagePath != "undefined" && Model.ImagePath != "null")
+        {
+            <div class="row">
+                <section class="col col-4">
+                    <img src="~/Content/Uploads/Img/Procedure/@Model.ImagePath" alt="@Model.Title" title="@Model.Title" />
+                    <br />
+                    <a href="#" class="js-deleteProcedureImage" data-procedureId="@Model.Id">@CRM.Application.Core.Resources.General.General.Delete @CRM.Application.Core.Resources.Procedures.Procedure.Image</a>
+                </section>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <section class="col col-4">
+                    <label for="image" class="input">
+                        <input type="file" class="form-control" name="procedureImage" id="ProcedureImage" />
+                    </label>
+                </section>
+            </div>
+        }
+        @Html.HiddenFor(x => x.Created)
+        @Html.HiddenFor(x => x.ImagePath, new { @id = "OldProcedureImage" })
+        @Html.HiddenFor(x => x.PDFName, new { @id = "OldPDFName" })
+    </fieldset>
+
+    @if (Model.ProcedureItems.Count > 0)
+    {
+        for (var i = 0; i < Model.ProcedureItems.Count; i++)
+        {
+            <fieldset class="js-addFieldsCounter">
+                <span>@CRM.Application.Core.Resources.Procedures.Procedure.ProcedureItem @{ var result = i + 1; } @result</span>
+                <div class="row">
+                    <section class="col col-4">
+                        <label for="country" class="input">
+                            @Html.TextBoxFor(x => x.ProcedureItems[i].Title, new { @id = "ProcedureItemTitle" + i, @placeholder = "Title", @class = "form-control" })
+                        </label>
+                    </section>
+                    @if (i != 0)
+                    {
+                        <section class="col col-4">
+                            <a href="@Url.Action("Delete", "Procedure", new { @procedureItemId = Model.ProcedureItems[i].Id, @procedureId = Model.Id })" class="js-editProcedureItem">@CRM.Application.Core.Resources.General.General.Delete @CRM.Application.Core.Resources.Procedures.Procedure.Item</a>
+                        </section>
+                    }
+                </div>
+                <div class="row">
+                    <section class="col col-4">
+                        <label for="country" class="input">
+                            @Html.TextAreaFor(x => x.ProcedureItems[i].Description, new {@id = "ProcedureItemDescription" + i, @placeholder = "Description", @class = "form-control", @rows = "5" })
+                        </label>
+                    </section>
+                </div>
+                @if(Model.ProcedureItems[i].ImagePath != "null" && Model.ProcedureItems[i].ImagePath != null && Model.ProcedureItems[i].ImagePath != "undefined")
+                {
+                    <div class="row">
+                        <section class="col col-4">
+                            <img src="~/Content/Uploads/Img/Procedure/@Model.ProcedureItems[i].ImagePath" title="@Model.ProcedureItems[i].Title" alt="@Model.ProcedureItems[i].Description" />
+                            <br />
+                            <a href="#" class="js-deleteProcedureItemImage" data-procedureItemId="@Model.ProcedureItems[i].Id" data-itemNumber="@i">@CRM.Application.Core.Resources.General.General.Delete @CRM.Application.Core.Resources.Procedures.Procedure.Image.ToLower()</a>
+                        </section>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <section class="col col-4">
+                            <label for="image" class="input">
+                                @Html.TextBox("ProcedureItemImage[]", null, new { type = "file", @id = "ProcedureItemImage" + i, @class = "form-control" })
+                            </label>
+                        </section>
+                    </div>
+                }
+            </fieldset>
+            @Html.HiddenFor(x => x.ProcedureItems[i].Id, new { @id = "ProcedureItemId" + i })
+            @Html.HiddenFor(x => x.ProcedureItems[i].ProcedureId, new { @id = "ProcedureId" })
+            @Html.HiddenFor(x => x.ProcedureItems[i].ImagePath, new { @id = "OldProcedureItemImage" + i})
+        }
+        
+        <div class="row">
+            <section class="col col-4">
+                <button type="button" id="btnAddProcedureItem" class="btn btn-primary btn-sm">
+                    @CRM.Application.Core.Resources.Procedures.Procedure.AddProcedureItem
+                    <!--TODO: Add translation-->
+                </button>
+            </section>
+        </div>
+    }
+    else
+    {
+        <fieldset class="js-addFieldsCounter">
+            <span>@CRM.Application.Core.Resources.Procedures.Procedure.ProcedureItem</span>
+            <div class="row">
+                <section class="col col-4">
+                    <label for="country" class="input">
+                        <input type="text" name="ProcedureItems[0].Title" id="ProcedureItemTitle0" class="form-control" placeholder="@CRM.Application.Core.Resources.Procedures.Procedure.Title" required="required" />
+                    </label>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-4">
+                    <label for="country" class="input">
+                        <textarea name="ProcedureItems[0].Description" id="ProcedureItemDescription0" class="form-control" rows="5" placeholder="@CRM.Application.Core.Resources.Procedures.Procedure.Description" required="required"></textarea>
+                    </label>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-4">
+                    <label for="image" class="input">
+                        <input type="file" class="form-control" name="ProcedureItemImage[]" id="ProcedureItemImage0" />
+                    </label>
+                </section>
+            </div>
+            <div class="row">
+                <section class="col col-4">
+                    <button type="button" id="btnAddProcedureItem" class="btn btn-primary btn-sm">
+                        @CRM.Application.Core.Resources.Procedures.Procedure.AddProcedureItem
+                        <!--TODO: Add translation-->
+                    </button>
+                </section>
+            </div>
+        </fieldset>
+        @Html.HiddenFor(x => x.Id, new { @id = "procedureId" })
+    }
+
+    <div class="js-dynamicFieldsContainer"></div>
+
+    <footer>
+        @if (Model.Id == 0)
+        {
+            <button type="submit" id="btnSaveProcedure" class="btn btn-primary">
+                @CRM.Application.Core.Resources.General.General.Cancel
+            </button>
+        }
+        else
+        {
+            <button type="submit" id="btnUpdateProcedure" class="btn btn-primary">
+                @CRM.Application.Core.Resources.General.General.Update
+            </button>
+        }
+    </footer>
+</form>

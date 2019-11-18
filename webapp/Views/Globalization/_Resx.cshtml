@@ -1,0 +1,22 @@
+﻿@using System.Collections;
+@using System.Resources;
+@using System.Globalization;
+@model Type
+
+@{
+    ResourceManager resxManager = new ResourceManager(Model);
+    ResourceSet resourceSet = resxManager.GetResourceSet(CultureInfo.CurrentUICulture, true, true);
+}
+<script>
+
+    if (!window.hasOwnProperty("resx")) {
+        window.resx = {};
+    }
+    var resxObj = {};
+    @foreach (DictionaryEntry entry in resourceSet)
+    {
+        @:resxObj["@entry.Key"] = $('<div/>').html("@entry.Value").text();
+    }
+    resx["@resxManager.BaseName"] = resxObj;
+
+</script>

@@ -1,0 +1,81 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerViewModel
+@using X.PagedList;
+@{
+    Layout = null;
+    bool IsMobile = MobileCheckService.fBrowserIsMobile();
+}
+
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+@Html.Hidden("hiddenSelectedCustomerId", new { id = "hiddenSelectedCustomerId" })
+
+
+@{ var odd = true; }
+@{HttpCookie cookie = HttpContext.Current.Request.Cookies["CustomersTable"]; }
+@foreach (var customer in Model.CustomersList)
+{
+    var rowColor = customer.CustomerRowColor == "#ffffff" ? "" : customer.CustomerRowColor;
+    var textColor = "";
+    if (rowColor != null && rowColor != string.Empty)
+    {
+        textColor = "white";
+    }
+    else
+    {
+        textColor = "#3276b1";
+    }
+    var latestCustomerNote = customer.CustomerNotes != null && customer.CustomerNotes.Count > 0 ? customer.CustomerNotes.OrderByDescending(x => x.CreationDate).FirstOrDefault().Note : string.Empty;
+    //int latestCustomerId = 0;
+
+    //if (cookie != null && cookie.Value != null && cookie.Values["customerId"] != null && !string.IsNullOrEmpty(cookie.Values["customerId"]))
+    //{
+    //    latestCustomerId = int.Parse(cookie.Values["customerId"]);
+    //}
+<tr style="background-color:@rowColor" role="row" class="@(odd ? "odd" : "even")">
+    <td notetip="@latestCustomerNote" class="expand sorting_1 noteToolTip">
+        <span class="responsiveExpander"></span><a href="@Url.Action("Edit", "Customers", new { @id = customer.Id, @LatestCustomersPageNumber = Model.LatestCustomersPageNumber,isCustomer = Model.CustomerStatusId == 1?true:false })">
+            <span style="color: @textColor">
+                @customer.CompanyName
+                @if (customer.Id == Model.LastEditedCustomer)
+                {
+                    <i class="fa fa-star"></i>
+                }
+            </span>
+        </a>
+    </td>
+    <td notetip="@latestCustomerNote" class="colors noteToolTip">
+        <span class="badge bg-color-green">&nbsp;</span>
+        @if (customer.CustomerNotes != null && customer.CustomerNotes.Count > 0)
+        {
+            <span class="badge" style="background-color:#fdff68">&nbsp;</span>
+        }
+        @if (customer.CustomerDashboardLists != null && customer.CustomerDashboardLists.Count > 0)
+        {
+            <span class="badge" style="background-color:#c79121">&nbsp;</span>
+        }
+        @if (customer.CustomerAppointments != null && customer.CustomerAppointments.Any(x => x.Date > DateTime.Now))
+        {
+            <span class="badge" style="background-color:#57889c">&nbsp;</span>
+        }
+    </td>
+    @if (!IsMobile)
+    {
+        <td notetip="@latestCustomerNote" class="noteToolTip"><span style="color: @textColor">@customer.Address    </span></td>
+        <td notetip="@latestCustomerNote" class="noteToolTip"><span style="color: @textColor">@customer.PostalCode    </span></td>
+        <td notetip="@latestCustomerNote" class="noteToolTip"><span style="color: @textColor">@customer.Town    </span></td>
+    }
+    <td notetip="@latestCustomerNote" class="noteToolTip"><a href="tel:@customer.Phone"><span style="color: @textColor"> @customer.Phone </span></a></td>
+
+    <td>
+        <a href="@Url.Action("Edit", "Customers", new { @id = customer.Id, @LatestCustomersPageNumber = Model.PageNumber,isCustomer = Model.CustomerStatusId == 1?true:false })" title="Update"><i class="fa fa-pencil-square-o"></i></a> |
+
+        <a class="addCustomerToList" data-customerId="@customer.Id" href="#" title="Add to List"><i class="fa fa-list-ul" data-toggle="modal" data-target="#myModal"></i></a>
+    </td>
+</tr>
+    odd = !odd;
+}
+
+
+
+@{Html.RenderPartial("_AddCustomerToDashboardList");}

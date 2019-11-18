@@ -1,0 +1,79 @@
+﻿@model CRM.Application.Core.ViewModels.EmailAccountViewModel
+@{
+    var currentCulture = System.Globalization.CultureInfo.CurrentCulture;
+    Layout = null;
+}
+
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+
+
+@foreach (var acc in Model.EmailAccountsPL)
+{
+    <tr role="row" class="odd">
+        <td>@acc.HostName</td>
+        <td>@acc.HostPort</td>
+        <td>@acc.UserName</td>
+        <td>@acc.FullAddress</td>
+        <td>@(acc.LatestSync.HasValue ? acc.LatestSync.Value.Date.ToShortDateString() : CRM.Application.Core.Resources.Email.Email.NoSyncAsOfYet)</td>
+        <td>
+            <a href="@Url.Action("Edit", "EmailAccounts" , new { @id=acc.Id, @LatestEmailAccountsPageNumber=Model.PageNumber })" title=@CRM.Application.Core.Resources.General.General.Edit><i class="fa fa-pencil-square-o"></i>@CRM.Application.Core.Resources.General.General.Edit</a>
+            <a href="#" class="deleteLink" accId="@acc.Id" accAddress="@acc.FullAddress" title=@CRM.Application.Core.Resources.General.General.Delete><i class="fa  fa-trash-o"></i>@CRM.Application.Core.Resources.General.General.Delete</a>
+        </td>
+    </tr>
+}
+<!-- Modal -->
+<div id="confirmDelete_Dialog" title="Dialog Simple Title">
+    <p>
+        @Html.Raw(CRM.Application.Core.Resources.Email.Email.DeleteEmailAccountHTML)
+    </p>
+</div>
+<!--modal -->
+
+<script type="text/javascript">
+    $().ready(() => {
+        var idToDelete;
+        /*
+        * CONVERT DIALOG TITLE TO HTML
+        * REF: http://stackoverflow.com/questions/14488774/using-html-in-a-dialogs-title-in-jquery-ui-1-10
+        */
+        $.widget("ui.dialog", $.extend({}, $.ui.dialog.prototype, {
+            _title: function (title) {
+                if (!this.options.title) {
+                    title.html("&#160;");
+                } else {
+                    title.html(this.options.title);
+                }
+            }
+        }));
+        $("#confirmDelete_Dialog").dialog({
+            autoOpen: false,
+            width: 600,
+            resizable: false,
+            modal: true,
+            title: "<div class='widget-header'><h4><i class='fa fa-warning'></i>@CRM.Application.Core.Resources.General.General.ConfirmAction</h4></div>",
+            buttons: [{
+                html: "<i class='fa fa-trash-o'></i>&nbsp; @CRM.Application.Core.Resources.General.General.Delete",
+                "class": "btn btn-danger",
+                click: function () {
+                    $(this).dialog("close");
+                    window.location.href = "EmailAccounts/Delete/" + idToDelete;
+                }
+            }, {
+                html: "<i class='fa fa-times'></i>&nbsp; @CRM.Application.Core.Resources.General.General.Cancel",
+                "class": "btn btn-default",
+                click: function () {
+                    $(this).dialog("close");
+                }
+            }]
+        });
+        $('.deleteLink').click((event) => {
+            var deleteDialog_p = $('#confirmDelete_Dialog p').html().replace('$address', $(event.target).attr("accAddress"));
+            $('#confirmDelete_Dialog p').html(deleteDialog_p);
+            idToDelete = $(event.target).attr('accId');
+            $("#confirmDelete_Dialog").dialog("open");
+            return false;
+        });
+    });
+</script>

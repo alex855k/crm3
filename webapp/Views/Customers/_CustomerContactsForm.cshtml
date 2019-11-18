@@ -1,0 +1,59 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerContactsViewModel
+@{
+    Layout = null;
+ }
+
+    <form id="customerContactsForm" class="smart-form">
+        @Html.HiddenFor(x => x.Id, new { @id = "HiddenCustomerContactId" })
+        @Html.HiddenFor(x => x.CustomerId, new { @id = "HiddenCustomerId" })
+        <fieldset>
+            <div class="row">
+                <section class="col col-6">
+                    <label class="input">
+                        <i class="icon-prepend fa fa-user"></i>
+                        @Html.TextBoxFor(x => x.Title, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Title })
+                    </label>
+                </section>
+                <section class="col col-6">
+                    <label class="input">
+                        <i class="icon-prepend fa fa-user"></i>
+                        @Html.TextBoxFor(x => x.Name, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Name })
+                        <i></i>
+                    </label>
+                    @Html.ValidationMessageFor(x => x.Name, null, new { @class = "invalid validation" })
+                </section>
+            </div>
+
+            <div class="row">
+                <section class="col col-4">
+                    <label class="input">
+                        <i class="icon-prepend fa fa-envelope-o"></i>
+                        @Html.TextBoxFor(x => x.Email, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Email })
+                        @Html.ValidationMessageFor(x => x.Email, null, new { @class = "invalid validation" })
+                    </label>
+                </section>
+
+                <section class="col col-4">
+                    <label class="input">
+                        <i class="icon-prepend fa fa-phone"></i>
+                        @Html.TextBoxFor(x => x.Phone, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Phone })
+                        <i></i>
+                    </label>
+                </section>
+                <section class="col col-4">
+                    <label class="input">
+                        <i class="icon-prepend fa fa-phone"></i>
+                        @Html.TextBoxFor(x => x.Mobile, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Mobile })
+                        <i></i>
+                    </label>
+                </section>
+            </div>
+        </fieldset>
+        <footer>
+
+            <button type="button" id="btnSaveCustomerContacts" class="btn btn-primary">
+                Save
+            </button>
+        </footer>
+    </form>
+

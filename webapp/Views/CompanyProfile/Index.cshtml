@@ -1,0 +1,145 @@
+﻿@model CRM.Models.CompanyProfile
+@{
+    string imgSrc = string.Empty;
+    if (Model.Logo != null)
+    {
+        var base64 = Convert.ToBase64String(Model.Logo);
+        imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+    }
+}
+<!-- MAIN CONTENT -->
+<div id="content">
+    <!-- widget grid -->
+    <section id="widget-grid" class="">
+        <!-- row -->
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-id-1" data-widget-editbutton="false">
+                    <!-- widget options:
+                    usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                    data-widget-cotissinolorbutton="false"
+                    data-widget-editbutton="false"
+                    data-widget-togglebutton="false"
+                    data-widget-deletebutton="false"
+                    data-widget-fullscreenbutton="false"
+                    data-widget-custombutton="false"
+                    data-widget-collapsed="true"
+                    data-widget-sortable="false"
+
+                    -->
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>@CRM.Application.Core.Resources.Administration.CompanyProfile.CompanyProfileTitle</h2>
+
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body padding">
+
+                            <div class="row">
+                                <br />
+
+                                <div class="col-sm-12">
+
+                                    <div class="row">
+
+                                        <div class="col-sm-3 profile-pic">
+                                            <div class="form-group">
+                                                <img width="70" height="70" id="companyLogoImg" src="@(!string.IsNullOrEmpty(imgSrc)?imgSrc: "/Content/img/avatars/male.png")" alt="company logo">
+                                                <input type="file" style="display:none" name="logoUpload" id="logoFileUpload" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <ul class="list-unstyled">
+                                                <li>
+                                                    <p class="text-muted">
+                                                        <i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;<span class="txt-color-darken toReplace"><b id="companyNameText">@Model.Name</b></span>
+                                                        <input type='text' id='companyName' class='form-control toReplace' style="display:none" value="@Model.Name" />
+                                                    </p>
+                                                </li>
+                                                <li>
+                                                    <p class="text-muted">
+                                                        <i class="fa fa-phone"></i>&nbsp;&nbsp;<span id="companyPhoneText" class="txt-color-darken toReplace">
+                                                            @(!string.IsNullOrEmpty(Model.Phone) ? string.Format("{0: ###-####-###}", double.Parse(Model.Phone)) : "")
+                                                        </span>
+                                                        <input type='text' id='companyPhone' class='form-control toReplace' style="display:none" value="@Model.Phone" />
+                                                    </p>
+                                                </li>
+                                                <li>
+                                                    <p class="text-muted">
+                                                        <i class="fa fa-envelope"></i>&nbsp;&nbsp;<a id="companyMailText" href="mailto:@Model.Phone" class="toReplace">@Model.Email</a>
+                                                        <input type='text' id='companyMail' class='form-control toReplace' style="display:none" value="@Model.Email" />
+                                                    </p>
+                                                </li>
+                                                <li>
+                                                    <p class="text-muted">
+                                                        <i class="fa fa-windows"></i>&nbsp;&nbsp;<span id="companyURLText" class="txt-color-darken toReplace">@Model.URL</span>
+                                                        <input type='text' id='companyURL' class='form-control toReplace' style="display:none" value="@Model.URL" />
+
+                                                    </p>
+                                                </li>
+                                            </ul>
+                                            <br>
+                                            <p class="font-md">
+                                                <i>@CRM.Application.Core.Resources.Administration.CompanyProfile.CompanyAddress</i>
+                                            </p>
+                                            <p id="companyAddressText" class="toReplace">
+                                                @Model.Address
+                                            </p>
+                                            <textarea id="companyAddress" style="margin: 0px; width: 608px; height: 82px;display:none" class="toReplace">@Model.Address</textarea>
+                                            <br>
+                                            <div class="pull-right">
+                                                <button id="editCompanyProfile" class="btn btn-primary btn-xs toReplace">
+                                                    <i class="fa fa-pencil-square-o"></i> 
+                                                    @CRM.Application.Core.Resources.General.General.Edit
+                                                </button>
+                                                <button id="saveCompanyProfile" class="btn btn-primary btn-xs toReplace" style="display:none">
+                                                    <i class="fa fa-floppy-o"></i> 
+                                                    @CRM.Application.Core.Resources.General.General.Save
+                                                </button>
+                                                <button id="cancel" class="btn btn-primary btn-xs toReplace" style="display:none">
+                                                    <i class=""></i> 
+                                                    @CRM.Application.Core.Resources.General.General.Cancel
+                                                </button>
+
+                                            </div>
+                                            <br>
+                                            <br>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- end widget content -->
+                    </div>
+                    <!-- end widget div -->
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+        <!-- end row -->
+        <!-- end row -->
+    </section>
+    <!-- end widget grid -->
+
+</div>
+<!-- END MAIN CONTENT -->
+
+
+<script src="~/Scripts/CRM/CompanyProfile/CompanyProfile.js"></script>

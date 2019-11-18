@@ -1,0 +1,276 @@
+﻿@using CRM.Application.Core.Resources.Statistics
+@model CRM.Application.Core.ViewModels.DailyReportViewModel
+
+<!-- MAIN CONTENT -->
+<div id="content">
+    <!-- widget grid -->
+    <section id="widget-grid" class="">
+        <!-- row -->
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-id-1" data-widget-editbutton="false">
+                    <!-- widget options:
+                    usage: <div class="jarviswidget" id="wid-id-0" data-widget-editbutton="false">
+
+                    data-widget-colorbutton="false"
+                    data-widget-editbutton="false"
+                    data-widget-togglebutton="false"
+                    data-widget-deletebutton="false"
+                    data-widget-fullscreenbutton="false"
+                    data-widget-custombutton="false"
+                    data-widget-collapsed="true"
+                    data-widget-sortable="false"
+
+                    -->
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>@Stats.Statistics</h2>
+                    </header>
+
+                    <!-- widget div-->
+                    <div>
+
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+                            <div style="overflow:hidden;">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <table class="table table-bordered no-footer" style="width: 100%; border-width: 1px">
+                                                <thead>
+                                                    <tr>
+                                                        <td>
+                                                            <h1>@Stats.From:</h1>
+                                                        </td>
+                                                        <td><h1>@Stats.To:<button id="getStatisticsBtn" class="btn pull-right">@Stats.Get @Stats.Statistics</button></h1></td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td id="datetimepickerFrom"></td>
+                                                        <td id="datetimepickerTo"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2 col-md-2" style="height:100%">
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- stat content-->
+                                <div id="statContent">
+
+                                </div>
+
+                                <!-- stat content  END-->
+
+                            </div>
+                            <!-- end widget content -->
+                        </div>
+                        <!-- end widget div -->
+                    </div>
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+        <!-- end row -->
+        <!-- end row -->
+    </section>
+    <!-- end widget grid -->
+
+</div>
+<!-- END MAIN CONTENT -->
+<script src="~/Scripts/moment/moment-with-locales.min.js"></script>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<link href="~/Scripts/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/noUiSlider/nouislider.js"></script>
+<link href="~/Content/noUiSlider/css/nouislider.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    $(document).off("click", ".DayTr");
+    $(document).on("click", ".DayTr", function () {
+        const tr = $(this).parent()[0];
+        const id = $(tr).attr("data-caseid");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#Day-${id}`).show();
+        } else {
+            $(`#Day-${id}`).hide();
+        }
+    });
+
+    $(function () {
+        $('#datetimepickerFrom').datetimepicker({
+            inline: true,
+            sideBySide: false,
+            viewMode: 'days',
+            format: "DD/MM/YYYY",
+            locale: '@Stats.locale'
+        });
+        $('#datetimepickerTo').datetimepicker({
+            inline: true,
+            sideBySide: false,
+            viewMode: 'days',
+            format: "DD/MM/YYYY",
+            locale: "@Stats.locale"
+    });
+        $("#datetimepickerFrom").on("dp.change", function (e) {
+            $('#datetimepickerTo').data("DateTimePicker").minDate(e.date);
+        });
+        $("#datetimepickerTo").on("dp.change", function (e) {
+            $('#datetimepickerFrom').data("DateTimePicker").maxDate(e.date);
+        });
+    });
+    $("#getStatisticsBtn").click(function () {
+        var from = $("#datetimepickerFrom").data("DateTimePicker").date().toISOString();
+        var to = $("#datetimepickerTo").data("DateTimePicker").date().toISOString();
+
+        $.ajax({
+            url: "/Statistics/GetTimeRegStatistics",
+            data: { "from": from, "to": to },
+            dataType: "json",
+            success: function (data) {
+                $("#statContent").empty();
+                data.Stats.forEach(function (item) {
+                    //User
+                    WorkTimeTodaySun = item.User.SunHours;
+
+                    WorkTimeTodayMon = item.User.MonHours;
+                   
+                    WorkTimeTodayTue = item.User.TueHours;
+                    
+                    WorkTimeTodayWed = item.User.WedHours;
+                    
+                    WorkTimeTodayThur = item.User.ThurHours;
+                    
+                    WorkTimeTodayFri = item.User.FriHours;
+                    
+                    WorkTimeTodaySat = item.User.SatHours;
+                    
+                    var UserId = item.User.Id;
+                    $("#statContent").append(` <div id="statContent">
+                                    <div class="panel-group smart-accordion-default" id="accordion-${UserId}">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion-${UserId}" href="#${UserId}" aria-expanded="false" class="collapsed"> <i class="fa fa-fw fa-plus-circle txt-color-green"></i> <i class="fa fa-fw fa-minus-circle txt-color-red"></i>${item.User.FirstName} ${item.User.LastName}<span class="pull-right">${moment.duration(item.TotalTimeIso).format("h[@Stats.shortHour]:mm[@Stats.shortMin]", { trim: false })}</span></a></h4>
+                                            </div>
+                                            <div id="${UserId}" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                                                <div class="panel-body">
+                                                    <table id="timeRegTable" class="projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                                                        <tbody id="dayTBody-${UserId}">
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> `);
+                    item.Days.forEach(function(item) {
+                        //Days
+                        var WorkTimeToday;
+                        debugger;
+                        var DateDay = moment(Date(item.Date).replace(/\/Date\((-?\d+)\)\//, "$1")).day();
+                        switch (DateDay) {
+                        case 0:
+                                WorkTimeToday = WorkTimeTodaySun;
+                                break;
+                        case 1:
+                                WorkTimeToday = WorkTimeTodayMon;
+                                break;
+                        case 2:
+                                WorkTimeToday = WorkTimeTodayTue;
+                                break;
+                        case 3:
+                                WorkTimeToday = WorkTimeTodayWed;
+                                break;
+                        case 4:
+                                WorkTimeToday = WorkTimeTodayThur;
+                                break;
+                        case 5:
+                                WorkTimeToday = WorkTimeTodayFri;
+                                break;
+                        case 6:
+                                WorkTimeToday = WorkTimeTodaySat;
+                                break;
+                        
+                        };
+                        var intervalDur = moment.duration(item.DayTotalTimeIso);
+                        var expectDur = moment.duration(WorkTimeToday , "hours");
+                        if (intervalDur > expectDur ) {
+                            var style = 'style="color:#ff0000"';
+                        }
+                        var dateId = (item.Date).replace(/\/Date\((-?\d+)\)\//, "$1");
+                        $(`#dayTBody-${UserId}`).append(`<tr data-caseid="${UserId}-${dateId}" @*role="row" *@ class="even expandCollapseDetails">
+                                                                <td>${moment(new Date(parseInt((item.Date).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY")}<span ${style} class="pull-right">${intervalDur.format("h[@Stats.shortHour]:mm[@Stats.shortMin]", { trim: false })}</span></td>
+                                                                <td style="width: 15px" class="details-control DayTr"></td>
+
+                                                            <tr class="DayTr" id="Day-${UserId}-${dateId}" style="display: none">
+                                                                <td colspan="6">
+                                                                    <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <td>@Stats.Started</td>
+                                                                            <td>@Stats.Ended</td>
+                                                                            <td>@Stats.Interval</td>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody id="TimeRegTBody-${UserId}-${dateId}">
+
+
+                                                                        </tbody>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                            </tr>`);
+
+                        item.TimeRegistrations.forEach(function(item) {
+                            //Timereg
+                            var endTime = "-";
+                            if (item.EndDateTime != null) {
+                                endTime = moment(
+                                        new Date(parseInt((item.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1"))))
+                                    .format("HH:mm");
+                            }
+                            $(`#TimeRegTBody-${UserId}-${dateId}`).append(`<tr>
+                                                            <td>${moment(new Date(
+                                    parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1"))))
+                                .format("HH:mm")}</td>
+                                                            <td>${endTime}</td>
+                                                            <td>${moment.duration(item.IntervalIsoString)
+                                .format("h[@Stats.shortHour]:mm[@Stats.shortMin]:ss[@Stats.shortSec]", { trim: false })}</td>
+                                                       </tr>`);
+                        });
+
+                    });
+
+
+                });
+
+
+            },
+            error: function (data) {
+                toastr.error("Getting statistics failed");
+
+            }
+        });
+    });
+
+
+</script>

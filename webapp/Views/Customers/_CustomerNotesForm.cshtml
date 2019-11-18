@@ -1,0 +1,108 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerNotesViewModel
+@{ Layout = null;}
+
+<form id="customerNotesForm" class="smart-form">
+    @Html.HiddenFor(x => x.Id, new { @id = "HiddenCustomerNoteId" })
+    @Html.HiddenFor(x => x.CustomerId, new { @id = "HiddenCustomerId" })
+    @Html.HiddenFor(x => x.CreationDate)
+    @Html.HiddenFor(x => x.CreatedBy)
+    @Html.HiddenFor(x => x.Attachments, new { @id = "HiddenAttachments" })
+    @Html.HiddenFor(x => x.RemovedAttachments, new { @id = "HiddenRemovedAttachments" })
+    <fieldset>
+        <div class="row">
+            <section class="col col-12">
+                <label class="input">
+                    @Html.TextAreaFor(x => x.Note, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Note, @cols = 160, @rows = 6 })
+                </label>
+                @Html.ValidationMessageFor(x => x.Note, null, new { @class = "invalid validation" })
+            </section>
+        </div>
+        @if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerNoteOptions", "Customers"))
+        {
+            <div class="row">
+                <section class="col col-4">
+                    <label class="select">
+                        @Html.DropDownListFor(x => x.CustomerNotesReportId, new SelectList(Model.CustomerNotesReportList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.Report)
+                        <i></i>
+                    </label>
+                </section>
+                <section class="col col-4">
+                    <label class="select">
+                        @Html.DropDownListFor(x => x.CustomerNotesVisitTypeId, new SelectList(Model.CustomerNotesVisitTypeList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.Type)
+                        <i></i>
+                    </label>
+                </section>
+                <section class="col col-4">
+                    <label class="select">
+                        @Html.DropDownListFor(x => x.CustomerNotesDemoId, new SelectList(Model.CustomerNotesDemoList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.Demo)
+                        <i></i>
+                    </label>
+                </section>
+            </div>
+        }
+        <div class="row">
+            <section class="col col-6">
+                <div class="form-group">
+                    <div class="fileUpload btn btn-primary col-md-3 col-lg-4">
+                        <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+                        <span>@CRM.Application.Core.Resources.General.Files.UploadAttachments</span>
+                        <input type="file" id="FileUpload1" name="FileUpload1" class="fileUploadButton" multiple="">
+                    </div>
+                    <p class="help-block pull-left">
+                        @CRM.Application.Core.Resources.General.Files.MaxFileSize 100MB
+                    </p>
+                </div>
+                <span class="field-validation-valid invalid validation" id="fileUploadValidationMessage"></span>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col col-6">
+                @if (Model.Id == 0)
+                {
+                    <table style="display:none" class="table table-bordered" id="tableAttachments">
+                        <thead>
+                            <tr>
+                                <th>@CRM.Application.Core.Resources.General.Files.FileName</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                }
+                else
+                {
+                    <table class="table table-bordered" id="tableAttachments">
+                        <thead>
+                            <tr>
+                                <th>@CRM.Application.Core.Resources.General.Files.FileName</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{int i = 1;}
+                            @foreach (var attachment in Model.Attachments)
+                            {
+                                <tr id="@i">
+                                    <td>@attachment</td>
+                                    <td>
+                                        <a data-name="@attachment" class='removeAttachment' href='#'><i class='fa fa-trash-o' aria-hidden='true'></i></a> |
+                                        <a class='downloadAttachment' data-attachment="@attachment" href='#'><i class='fa fa-download' aria-hidden='true'></i></a>
+                                    </td>
+
+                                </tr>
+                                i++;
+                            }
+                        </tbody>
+                    </table>
+                }
+            </section>
+        </div>
+
+    </fieldset>
+    <footer>
+        <button type="button" id="btnSaveCustomerNotes" class="btn btn-primary">
+            @CRM.Application.Core.Resources.General.General.Save
+        </button>
+    </footer>
+</form>
+

@@ -1,0 +1,2041 @@
+﻿@using System.Globalization
+@using CRM.Application.Core.Resources.Customers
+@using CRM.Application.Core.Resources.General
+@using CRM.Application.Core.Resources.DrivingRegistrations
+@using CRM.Application.Core.Resources.TimeRegistrations
+@model CRM.Application.Core.ViewModels.CustomerCaseDatatableViewModel
+@Html.HiddenFor(x => x.CurrentUserID, new { id = "hiddenCurrentUserId" })
+@functions {
+    // This presumes that weeks start with Monday.
+    // Week 1 is the 1st week of the year with a Thursday in it.
+    private static int GetIso8601WeekOfYear(System.DateTime time)
+    {
+        // Seriously cheat.  If its Monday, Tuesday or Wednesday, then it'll
+        // be the same week# as whatever Thursday, Friday or Saturday are,
+        // and we always get those right
+        DayOfWeek day = CultureInfo.InvariantCulture.Calendar.GetDayOfWeek(time);
+        if (day >= DayOfWeek.Monday && day <= DayOfWeek.Wednesday)
+        {
+            time = time.AddDays(3);
+        }
+
+        // Return the week of our adjusted day
+        return CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(time, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+    }
+
+}
+<!-- MAIN CONTENT -->
+<div id="content">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="keep-right" style="margin-bottom: 10px">
+                <a id="createBtn" class="btn btn-primary">@Customer.CreateCase</a>
+            </div>
+        </div>
+    </div>
+    <!-- widget grid -->
+    <section id="widget-grid" class=".jarviswidget-color-red">
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-red" id="wid-week-zero" data-widget-editbutton="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2><span id="pendingWid">@CustomerCase.NotPlanned @Customer.Cases</span></h2>
+                    </header>
+                    <!-- widget div-->
+                    <div>
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+                            <div style="overflow:hidden;">
+                                <div id="datatable_fixed_column_wrapper" class="dataTables_wrapper form-inline no-footer">
+                                    <!--table-->
+                                    <table id="pendingTable" class="display projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                                        <thead>
+                                            <tr role="row">
+                                                <th>@Customer.CustomerCustomer</th>
+                                                <th>@Customer.Case / @Customer.Assignment</th>
+                                                <th>@Customer.ProjectLeader</th>
+                                                <th>@Customer.CaseResponsible</th>
+                                                <th>@Customer.Status</th>
+                                                <th>@Customer.Usedtime /(@Customer.Estimated)</th>
+                                                <th>
+                                                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Deadline
+                                                </th>
+                                                <th class="details-control sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 22px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pendingTbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- end widget content -->
+                        </div>
+                        <!-- end widget div -->
+                    </div>
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+        <!-- row -->
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-week-one" data-widget-editbutton="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>@Customer.Cases <span id="-1Week">@GetIso8601WeekOfYear(System.DateTime.Today.AddDays(-7))</span></h2>
+                    </header>
+                    <!-- widget div-->
+                    <div>
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+                            <div style="overflow: hidden;">
+                                <div id="datatable_fixed_column_wrapper" class="dataTables_wrapper form-inline no-footer">
+                                    <!--table-->
+                                    <table id="-1table" class="display projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                                        <thead>
+                                            <tr role="row">
+                                                <th>@Customer.CustomerCustomer</th>
+                                                <th>@Customer.Case / @Customer.Assignment</th>
+                                                <th>
+                                                    @Customer.ProjectLeader
+                                                </th>
+                                                <th>@Customer.CaseResponsible</th>
+                                                <th>@Customer.Status</th>
+                                                <th>@Customer.Usedtime /(@Customer.Estimated)</th>
+                                                <th>
+                                                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Deadline
+                                                </th>
+                                                <th class="details-control sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 22px;"></th>
+                                                @*<th class="details-control" style="width: 22px;"><button id="caseTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="-1Tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- end widget content -->
+                        </div>
+                        <!-- end widget div -->
+                    </div>
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+        <!-- end row -->
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-week-two" data-widget-editbutton="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>@Customer.Cases <span id="0Week">@GetIso8601WeekOfYear(System.DateTime.Today)</span></h2>
+                    </header>
+                    <!-- widget div-->
+                    <div>
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+                            <div style="overflow: hidden;">
+                                <div id="datatable_fixed_column_wrapper" class="dataTables_wrapper form-inline no-footer">
+                                    <!--table-->
+                                    <table id="0table" class="display projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                                        <thead>
+                                            <tr role="row">
+                                                <th> @Customer.CustomerCustomer</th>
+                                                <th>@Customer.Case / @Customer.Assignment</th>
+                                                <th>
+                                                    @Customer.ProjectLeader
+                                                </th>
+                                                <th>@Customer.CaseResponsible</th>
+                                                <th>@Customer.Status</th>
+                                                <th>@Customer.Usedtime /(@Customer.Estimated)</th>
+                                                <th>
+                                                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Deadline
+                                                </th>
+                                                <th class="details-control sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 22px;"></th>
+                                                @*<th class="details-control" style="width: 22px;"><button id="caseTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="0Tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- end widget content -->
+                        </div>
+                        <!-- end widget div -->
+                    </div>
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-week-three" data-widget-editbutton="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>@Customer.Cases <span id="+1Week">@GetIso8601WeekOfYear(System.DateTime.Today.AddDays(7))</span></h2>
+                    </header>
+                    <!-- widget div-->
+                    <div>
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+                            <div style="overflow: hidden;">
+                                <div id="datatable_fixed_column_wrapper" class="dataTables_wrapper form-inline no-footer">
+                                    <!--table-->
+                                    <table id="1table" class="display projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                                        <thead>
+                                            <tr role="row">
+                                                <th> @Customer.CustomerCustomer</th>
+                                                <th>@Customer.Case / @Customer.Assignment</th>
+                                                <th>
+                                                    @Customer.ProjectLeader
+                                                </th>
+                                                <th>@Customer.CaseResponsible</th>
+                                                <th>@Customer.Status</th>
+                                                <th>@Customer.Usedtime /(@Customer.Estimated)</th>
+                                                <th>
+                                                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Deadline
+                                                </th>
+                                                <th class="details-control sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 22px;"></th>
+                                                @*<th class="details-control" style="width: 22px;"><button id="caseTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="1Tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- end widget content -->
+                        </div>
+                        <!-- end widget div -->
+                    </div>
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+
+        <div class="row">
+            <!-- NEW WIDGET START -->
+            <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <!-- Widget ID (each widget will need unique ID)-->
+                <div class="jarviswidget jarviswidget-color-blueDark" id="wid-week-4" data-widget-editbutton="false">
+                    <header>
+                        <span class="widget-icon"> <i class="fa fa-table"></i> </span>
+                        <h2>@Customer.Cases <span id="2Week">@GetIso8601WeekOfYear(System.DateTime.Today.AddDays(14))</span></h2>
+                    </header>
+                    <!-- widget div-->
+                    <div>
+                        <!-- widget edit box -->
+                        <div class="jarviswidget-editbox">
+                            <!-- This area used as dropdown edit box -->
+                        </div>
+                        <!-- end widget edit box -->
+                        <!-- widget content -->
+                        <div class="widget-body no-padding">
+                            <div style="overflow: hidden;">
+                                <div id="datatable_fixed_column_wrapper" class="dataTables_wrapper form-inline no-footer">
+                                    <!--table-->
+                                    <table id="2table" class="display projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+                                        <thead>
+                                            <tr role="row">
+                                                <th>@Customer.CustomerCustomer</th>
+                                                <th>@Customer.Case / @Customer.Assignment</th>
+                                                <th>@Customer.ProjectLeader</th>
+                                                <th>@Customer.CaseResponsible</th>
+                                                <th>@Customer.Status</th>
+                                                <th>@Customer.Usedtime /(@Customer.Estimated)</th>
+                                                <th>
+                                                    <i class="fa fa-fw fa-calendar text-muted hidden-md hidden-sm hidden-xs"></i> @Customer.Deadline
+                                                </th>
+                                                <th class="details-control sorting_disabled" rowspan="1" colspan="1" aria-label="" style="width: 22px;"></th>
+                                                @*<th class="details-control" style="width: 22px;"><button id="caseTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>*@
+                                            </tr>
+                                        </thead>
+                                        <tbody id="2Tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- end widget content -->
+                        </div>
+                        <!-- end widget div -->
+                    </div>
+                </div>
+            </article>
+            <!-- WIDGET END -->
+        </div>
+    </section>
+    <!-- end widget grid -->
+</div>
+<!-- END MAIN CONTENT -->
+<div class="modal fade" id="caseModal" data-caseId="" tabindex="-1" ro le="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{Html.RenderAction("CaseFormModal", "CustomerCases");}
+</div>
+<div class="modal fade" id="AssignmentModal" data-caseId="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{ Html.RenderPartial("_AssignmentModal"); }
+</div>
+<div class="modal fade" id="TimeRegModal" data-caseId="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{Html.RenderPartial("_CaseTimeRegistrationModal"); }
+</div>
+<div class="modal fade" id="DrivingRegModal" data-caseId="" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    @{Html.RenderPartial("_CaseDrivingRegistrationModal"); }
+</div>
+@{
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(Customer));
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(General));
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(TimeReg));
+    Html.RenderPartial("~/Views/Globalization/_Resx.cshtml", typeof(DrivingReg));
+}
+<script src="~/Scripts/moment/moment.min.js"></script>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<link href="~/Scripts/plugin/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/noUiSlider/nouislider.js"></script>
+<link href="~/Content/noUiSlider/css/nouislider.css" rel="stylesheet" />
+<script src="~/Scripts/CRM/Enum/SortDirection.js"></script>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<script src="~/Scripts/noUiSlider/nouislider.js"></script>
+<link href="~/Content/noUiSlider/css/nouislider.css" rel="stylesheet" />
+<link href="~/Content/Weekpicker/week-picker.css" rel="stylesheet" />
+<script src="~/Content/Weekpicker/week-picker.js"></script>
+
+<style>
+
+    .blue {
+        color: blue;
+    }
+
+    .bootstrap-datetimepicker-widget {
+        z-index: 1151 !important;
+    }
+
+    tbody tr[role='row'] {
+        cursor: pointer;
+    }
+
+    .redClass {
+        border-color: #9a0325 !important;
+        background: #a90329;
+    }
+
+    .greenClass {
+        background: #739e73 !important;
+        border-color: green !important;
+    }
+</style>
+<script type="text/javascript">
+    // Temporary fix to stop displaying warning messages for users
+    $.fn.dataTable.ext.errMode = 'throw';
+     //#region outfactored
+
+    //opens case create modal
+    $("#createBtn").click(function () {
+        emptycaseModal();
+        $("#caseModal").modal("show");
+    });
+
+    //Assignment open close
+    $(document).on("click", ".Assignment", function () {
+        console.log("clicked");
+        const tr = $(this).parent()[0];
+        const id = $(tr).attr("data-assignmentId");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#Assignment${id}`).show();
+        } else {
+            $(`#Assignment${id}`).hide();
+        }
+    });
+    /*
+    function customerChange(e) {
+        var id = e.value;
+        console.log("customer change");
+        if (id != "null") {
+            debugger;
+            $.ajax({
+                url: "/CustomerCases/GetCasePeople",
+                data: { "customerId": id },
+                async: false,
+                success: function (data) {
+
+                    var $contacts = $("#contactPerson");
+                    var $caseResponsible = $("#caseResponsible");
+                    var $projectLeader = $("#projectLeader");
+                    var $caseTypes = $("#caseTypes");
+
+                    $contacts.children().remove();
+                    $caseResponsible.children().remove();
+                    $projectLeader.children().remove();
+                    $caseTypes.children().remove();
+
+
+                    $.each(data.UsersList,
+                        function (index, item) {
+                            var isCurrentUser = "";
+
+                            if ($("#hiddenCurrentUserId").val() === item.Id)
+                                isCurrentUser = "selected";
+                            $caseResponsible
+                                .append(`<option value=${item.Id} selected=${isCurrentUser}>${item.FirstName}</option>`);
+                            $projectLeader
+                                .append(`<option value=${item.Id} selected=${isCurrentUser}>${item.FirstName}</option>`);
+                        });
+
+                    $.each(data.contactsList,
+                        function (index, item) {
+                            $contacts
+                                .append(`<option value=${item.Id}>${item.Name}</option>`);
+                        });
+                    $.each(data.CaseTypesList,
+                        function (index, item) {
+                            $caseTypes
+                                .append(`<option value=${item.Id}>${item.TypeName}</option>`);
+                        });
+                },
+                error: function (error) {
+                }
+            });
+            }
+        }
+        */
+
+    function initializeSliders() {
+        $.each($(".listSlider"),
+            function (i, item) {
+
+                if ($(item).data("sliderval") !== "undefined") {
+                    return;
+                }
+
+                window[item.id] = document.getElementById(item.id);
+                let start = "0";
+                if ($(`#${item.id}`).attr("data-sliderVal") != null) {
+                    start = $(`#${item.id}`).attr("data-sliderVal");
+                };
+                noUiSlider.create(window[item.id],
+                    {
+                        start: [start],
+                        connect: [true, false],
+                        tooltips: [true],
+                        step: 1,
+                        range: {
+                            'min': [0],
+                            'max': [100]
+                        }
+
+                    });
+            });
+    }
+    function getAssignmentsDropdown(caseId, el) {
+        el.append(`<option value=${null}>@Customer.None</option>`);
+
+        $.ajax({
+            url: "/CustomerCases/GetCaseAssignments",
+            data: { caseId },
+            success: function(data) {
+
+
+                $.each(data.AssignmentsList,
+                    function(index, item) {
+                        el.append(`<option value=${item.Id}>${item.Title}</option>`);
+                    });
+            },
+            error: function(error) {
+            }
+        });
+    }
+    function getAssignmentsTable(caseId) {
+        $("#AssignmentsTBody").empty();
+        $("#AssignmentsDoneTBody").empty();
+
+        $.ajax({
+            url: "/CustomerCases/GetCaseAssignments",
+            data: { 'caseId': caseId },
+            dataType: "json",
+            success: function(data) {
+                $("#otherAssignment").append(`<option value="null">@Customer.None</option>`);
+                $.each(data.AssignmentsList,
+                    function(index, item) {
+                        $("#otherAssignment").append(`<option value=${item.Id}>${item.Title}</option>`);
+                    });
+                //Active Assignment List
+                $.each(data.AssignmentsList.filter(x => x.Done === null || x.Done === false),
+                    function(i, item) {
+                        var linkedTitle = "@Customer.None";
+                        if (item.LinkedCaseAssignmentId != null) {
+                            linkedTitle =
+                                (data.AssignmentsList.find(x => item.LinkedCaseAssignmentId === x.Id)).Title;
+                        };
+                        $("#assignmentsTable").append(
+                            `<tr id="${item.Id}-assignment" data-plusesti="${item.AddToCaseEstimate}" data-assignmentId="${item.Id}" data-caseid="${item.CustomerCaseId}" data-ended="false" class="AssignmentRemove${item.Id} even expandCollapseDetails">
+                                    <td style="max-width:150px; word-wrap:break-word" id="AssignmentTitle-${item.Id}" data-editable-${item.Id} style="display: block;">${item.Title}</td>
+                                    <td data-value="${item.UserId}"data-editable-${item.Id} id="${item.Id}-responsible">${item.User.FirstName} ${item.User.LastName}</td>
+                                    <td id="AssignmentDateTime-start-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                    <td id="AssignmentDateTime-Deadline-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.Deadline).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+
+                                    <td id="${item.Id}-interval" data-editable-${item.Id}>${moment.duration(item.EstimatedTimeSpan).format("HH:mm", { trim: false })}</td>
+                                    <td style="width: 15px" class="details-control Assignment"></td>
+
+                                    <tr class="Assignment AssignmentRemove${item.Id}" id="Assignment${item.Id}" style="display: none">
+                                        <td colspan="6">
+                                            <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>@Customer.LinkedAssignment:</td>
+                                                        <td data-value="${item.LinkedCaseAssignmentId}" style="max-width:150px; word-wrap:break-word" id="${item.Id}-linkedAssignment" data-editable-${item.Id}>${linkedTitle}  </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>@TimeReg.Description:</td>
+                                                        <td style="max-width:150px; word-wrap:break-word" id="AssignmentDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td id="${item.Id}-assignmentsActions">
+                                                            <button id="${item.Id}-endAssignmentBtn" style="margin-right: 10px" data-Assignment-id="${item.Id} "data-case-id="${caseId}" class="btn btn-xs endAssignmentBtn btn-warning pull-left">@Customer.End</button>
+                                                            <button id="${item.Id}-editAssignmentBtn" style="margin-right: 10px" data-Assignment-id="${item.Id}" class="btn btn-xs editAssignmentBtn btn-info pull-left">@TimeReg.Edit</button>
+                                                            <button id="${item.Id}-DeleteBtn" data-Assignment-id="${item.Id}" class="btn btn-xs deleteAssignmentBtn btn-danger pull-left">@TimeReg.Delete</button>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tr>`);
+                    }
+                );
+                //Ended Assignment list
+                $.each(data.AssignmentsList.filter(x => x.Done === true),
+                    function(i, item) {
+                        var endDate;
+                        if (item.EndDateTime === null) {
+                            endDate = "@Customer.NotDone";
+                        } else {
+                            endDate = moment(
+                                    new Date(parseInt((item.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm");
+                        }
+                        var linkedTitle = "@Customer.None";
+                        if (item.LinkedCaseAssignmentId != null) {
+                            linkedTitle =
+                                (data.AssignmentsList.find(x => item.LinkedCaseAssignmentId === x.Id)).Title;
+                        };
+                        $("#assignmentsDoneTable").append(
+                            `<tr id="${item.Id}-assignment" data-plusesti="${item.AddToCaseEstimate}" data-assignmentId="${item.Id}" data-caseid="${item.CustomerCaseId}" data-ended="true" class="AssignmentRemove${item.Id} even expandCollapseDetails">
+                                    <td style="max-width:150px; word-wrap:break-word" id="AssignmentTitle-${item.Id}" data-editable-${item.Id} style="display: block;">${item.Title}</td>
+                                    <td data-value="${item.UserId}"data-editable-${item.Id} id="${item.Id}-responsible">${item.User.FirstName} ${item.User.LastName}</td>
+                                    <td id="AssignmentDateTime-start-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                    <td id="AssignmentDateTime-Ended-${item.Id}" data-editable-${item.Id}>${endDate}</td>
+
+                                    <td id="${item.Id}-interval" data-editable-${item.Id}>${moment.duration(item.EstimatedTimeSpan).format("HH:mm", { trim: false })}</td>
+                                    <td style="width: 15px" class="details-control Assignment"></td>
+
+                                    <tr class="Assignment AssignmentRemove${item.Id}" id="Assignment${item.Id}" style="display: none">
+                                        <td colspan="6">
+                                            <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                                <tbody>
+                                                    <tr>
+                                                        <td>@Customer.Deadline:</td>
+                                                        <td id="AssignmentDateTime-Deadline-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.Deadline).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>@Customer.LinkedAssignment:</td>
+                                                        <td data-value="${item.LinkedCaseAssignmentId}" style="max-width:150px; word-wrap:break-word" id="${item.Id}-linkedAssignment" data-editable-${item.Id}>${linkedTitle}  </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>@TimeReg.Description:</td>
+                                                        <td style="max-width:150px; word-wrap:break-word" id="AssignmentDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td id="${item.Id}-assignmentsActions">
+                                                            <button id="${item.Id}-restartAssignmentBtn" style="margin-right: 10px" data-Assignment-id="${item.Id} "data-case-id="${caseId}" class="btn btn-xs restartAssignmentBtn btn-warning pull-left">@Customer.Restart</button>
+                                                            <button id="${item.Id}-editAssignmentBtn" style="margin-right: 10px" data-Assignment-id="${item.Id}" class="btn btn-xs editAssignmentBtn btn-info pull-left">@TimeReg.Edit</button>
+                                                            <button id="${item.Id}-DeleteBtn" data-Assignment-id="${item.Id}" class="btn btn-xs deleteAssignmentBtn btn-danger pull-left">@TimeReg.Delete</button>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tr>`);
+                        if (item.Done === true) {
+                        }
+                    }
+                );
+            },
+            error: function() {
+                toastr.error("Could not fetch Time Registration");
+            }
+        });
+    }
+    function getUsersNames($el) {
+        $.ajax({
+            url: "/CustomerCases/GetUsersNames",
+            data: {},
+            success: function (data) {
+                $.each(data.Users,
+                    function (index, item) {
+                        var lastName = "";
+                        if (item.LastName === null) {
+                            console.log("null lastname");
+                        }
+                        if (item.LastName != null) {
+                            lastName = item.LastName;
+                        };
+
+                        $($el).append(
+                            `<option value=${item.Id}>${item.FirstName} ${lastName}</option>`
+                        );
+                    });
+            },
+            error: function (error) {
+            }
+        });
+    }
+    function assignmentTrCancel($el, assignmentId) {
+    $(`#${assignmentId}-cancelAssignmentBtn`).replaceWith(
+        `<button id="${assignmentId}-editAssignmentBtn" data-Assignment-id="${assignmentId
+        }" class="btn btn-xs editAssignmentBtn btn-info pull-left">@TimeReg.Edit</button> `);
+        $(`#${assignmentId}-saveAssignmentBtn`).remove();
+        $.each($el,function(i, item) {
+            const $id = $($el[i]).prop("id");
+            if ($id === `${assignmentId}-linkedAssignment`) {
+                const selected = $(item).children().find(":selected").text();
+                $(`#${assignmentId}-linkedAssignment`).empty();
+                $(`#${assignmentId}-linkedAssignment`).append(selected);
+                $(item).attr(`data-editable-${assignmentId}`, "");
+                $(item).removeAttr(`data-saveable-${assignmentId}`);
+            } else if ($id === `${assignmentId}-responsible`) {
+                const selected = $(item).children().find(":selected").text();
+                $(`#${assignmentId}-responsible`).empty();
+                $(`#${assignmentId}-responsible`).append(selected);
+                $(item).attr(`data-editable-${assignmentId}`, "");
+                $(item).removeAttr(`data-saveable-${assignmentId}`);
+            } else if ($id === `${assignmentId}-interval`) {
+
+                const dur = moment.duration({
+                    minutes: $(`#${assignmentId}-EditEstimatedMinute-spinner`).val(),
+                    hours: $(`#${assignmentId}-EditEstimatedHour-spinner`).val()
+                    }).format("HH:mm", { trim: false });
+                $(`#${assignmentId}-interval`).empty();
+                $(`#${assignmentId}-interval`).text(dur);
+                $(item).attr(`data-editable-${assignmentId}`, "");
+                $(item).removeAttr(`data-saveable-${assignmentId}`);
+            } else {
+                const $td = $(`<td data-editable-${assignmentId} id=${$id}>${$(item).val()} </td>`);
+                $(item).parent().replaceWith($td);
+            }
+        });
+    }
+
+    function clearAssignmentModal() {
+
+        $("#assignmentTitle").val("");
+        $("#assignmentDescription").val("");
+        $("#assignmentStart").val("");
+        $("#otherAssignment").empty();
+    }
+
+    function emptycaseModal() {
+
+        $("#customerSelect").val("null"); // Select the option with a value of "1"
+        $("#customerSelect").trigger("change");
+        editSlider.noUiSlider.set(0);
+        $("#contactPerson").empty();
+        $("#caseResponsible").empty();
+        $("#projectLeader").empty();
+        $("#caseTypes").empty();
+        $(".week-picker").weekPicker("clear");
+        $("#caseTitle").val("");
+        $("#caseDescription").val("");
+        $("#caseStartDate").val("");
+        $("#caseDeadlineDate").val("");
+        $("#estimatedTimeHour-spinner").val(1);
+        $("#estimatedTimeMinute-spinner").val(0);
+        $("#caseDeadlineDate").data("DateTimePicker").minDate(new Date());
+        $("#caseStartDate").data("DateTimePicker").date(new Date());
+        $("#caseStartDate").data("DateTimePicker").maxDate(new Date());
+        $("#Status").val("0");
+    }
+    function setWeekTo(week, year) {
+        $(".week-picker").weekPicker("clear");
+        $(".week-picker").weekPicker("toggleWeek", week, year);
+        $(".week-picker").weekPicker("updateSelection");
+    }
+    function getWeekString() {
+        var dates = $(".week-picker").weekPicker("value");
+        var weeks = dates.sort(function (a, b) {
+            return a > b;
+        }).map(function (date) {
+            return moment(date, "YYYY-MM-DD").format("W[/]YYYY");
+        });
+        return weeks[0];
+    }
+
+    function showCaseDetails(data) {
+        let detailsRow = `
+        <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+            <thead>
+                 <input type="hidden" name="custId" value="${data.CustomerId}">
+            </thead>
+            <tbody>
+            <tr>
+                <td>@Customer.Casenumber:</td>
+                <td style="max-width:150px; word-wrap:break-word" id="${data.Id}-CaseId"></td>
+                <td></td>
+            </tr>
+            <tr>
+                    <td>@Customer.Contact:</td>
+                    <td style="max-width: 150px; word-wrap: break-word" id="${data.Id}-contact"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>@Customer.Started:</td>
+                    <td id="${data.Id}-startDate"></td>
+                    <td></td>
+                </tr>`;
+        if (data.Done === 100)
+        {
+            detailsRow += `<tr>
+                <td>@Customer.Ended:</td>
+                <td id="${data.Id}-endDate"></td>
+                <td></td>
+            </tr>`;
+        }
+        detailsRow += `<tr>
+                    <td>@Customer.Description:</td>
+                    <td style="max-width: 150px; word-wrap: break-word" id="${data.Id}-description">This is a blank comments area, used to add comments and keep notes</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle">@Customer.ESTDoneLong:</td>
+                    <td style="vertical-align:middle">
+                        <div class="listSlider" style="margin-top: 5px; margin-bottom: 5px;" data-sliderVal="${data.PercentDone}" id="listSlider_${data.Id}">
+
+                        </div>
+                    </td>
+                    <td style="vertical-align:middle"><button id="estimatedSliderBtn" data-case-id="${data.Id}" class="btn btn-xs btn-info pull-right">@Customer.Save</button></td>
+                </tr>
+                <tr>
+                    <td>@Customer.Actions:</td>
+                    <td id="${data.Id}-actions">
+                        <button id="${data.Id}-editBtn" data-case-id="${data.Id}" data-customer-id="${data.CustomerId}" class="btn btn-xs editBtn btn-info pull-left">@Customer.Edit</button>`;
+
+        if (data.Done === 100)
+        {
+            detailsRow += `<button id="${data.Id}-restartBtn" data-case-id="${data.Id}" class="btn btn-xs restartBtn btn-warning pull-left">@Customer.Restart</button>`;
+        }
+        else
+        {
+            detailsRow += `<button id="${data.Id}-endBtn" data-case-id="${data.Id}" class="btn btn-xs endBtn btn-warning pull-left">@Customer.End</button>`;
+        }
+
+        detailsRow +=
+            `<button id="drivingRegBtn-${data.Id}" data-case-id="${data.Id}" class="drivingRegBtn btn btn-xs btn-basic pull-right">@Customer.DrivingRegistration</button>
+             <button id="timeRegBtn-${data.Id}" data-case-id="${data.Id}" class="timeRegBtn btn btn-xs btn-info pull-right">@Customer.TimeRegistration</button>
+
+                        <button id="assignmentsBtn" data-case-id=${data.Id} class="btn btn-xs assignmentsBtn btn-success pull-right">@Customer.Assignments</button>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>`;
+        return detailsRow;
+    }
+    $(document).ready(function () {
+        $("#timeRegStart").datetimepicker({
+            locale: "da",
+            sideBySide: true
+        });
+
+        $(".week-picker").on("change", function (event) {
+            console.log(event.detail); // { mode: "deselect", range: ["2017-06-12"] }
+        });
+        $("._week-picker").prepend("<label for='category'>Week Picker</label>")
+        $("._week-picker :input").addClass("form-control")
+        $("#assignmentStart").datetimepicker({
+            locale: "da"
+        });
+        $("#assignmentDeadlineDate").datetimepicker({
+            locale: "da"
+        });
+
+        $("#assignmentDeadlineDate").on("dp.change",
+            function (e) {
+                $("#assignmentStart").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#assignmentStart").on("dp.change",
+            function (e) {
+                $("#assignmentDeadlineDate").data("DateTimePicker").minDate(e.date);
+            });
+
+        $("#timeRegEnd").datetimepicker({
+            locale: "da",
+            sideBySide: true
+        });
+
+        $("#timeRegEnd").on("dp.change",
+            function (e) {
+                $("#timeRegStart").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#timeRegStart").on("dp.change",
+            function (e) {
+                $("#timeRegEnd").data("DateTimePicker").minDate(e.date);
+            });
+
+        $("#caseStartDate").datetimepicker({
+            date: new Date(),
+            locale: "da"
+        });
+
+        $("#caseDeadlineDate").datetimepicker({
+            locale: "da"
+        });
+
+        $("#caseDeadlineDate").on("dp.change",
+            function (e) {
+                $("#caseStartDate").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#caseStartDate").on("dp.change",
+            function (e) {
+                $("#caseDeadlineDate").data("DateTimePicker").minDate(e.date);
+            });
+
+        $(`#estimatedTimeHour-spinner`).spinner({
+            step: 1.0,
+            numberFormat: "n",
+            min: 0
+        });
+        $(`#estimatedTimeMinute-spinner`).spinner({
+            step: 5.0,
+            numberFormat: "n",
+            min: 0,
+            max: 59
+        });
+        $(`#estimatedTimeHour-spinner`).parent().css("width", "58px");
+        $(`#estimatedTimeMinute-spinner`).parent().css("width", "58px");
+
+
+
+    });
+
+    var editSlider = document.getElementById('g1-div');
+    noUiSlider.create(editSlider,
+        {
+            start: [0],
+            connect: [true, false],
+            tooltips: [true],
+            step: 1,
+            range: {
+                'min': [0],
+                'max': [100]
+            }
+
+        });
+    $(document).on("click",".endAssignmentBtn",function() {
+            const now = moment();
+            const id = parseInt($(this).attr("data-Assignment-id"));
+            const caseId = parseInt($(this).attr("data-case-id"));
+
+            $.ajax({
+                url: "/CustomerCases/EndCaseAssignment",
+                data: { AssignmentId: id, EndDateTime: now.toISOString() },
+                success: function(data) {
+                    getAssignmentsTable(caseId);
+                },
+                error: function(data) {
+                    toastr.error("@Customer.Ending @Customer.failed");
+                }
+            });
+    });
+    $(document).on("click",".restartAssignmentBtn",function() {
+            const id = parseInt($(this).attr("data-Assignment-id"));
+            const caseId = parseInt($(this).attr("data-case-id"));
+
+            $.ajax({
+                url: "/CustomerCases/RestartCaseAssignment",
+                data: { AssignmentId: id },
+                success: function(data) {
+                    getAssignmentsTable(caseId);
+                },
+                error: function(data) {
+                    toastr.error("@Customer.Restarting @Customer.failed");
+                    editSaveAssignmentBtn
+                }
+            });
+    });
+    $(document).on("click", ".cancelAssignmentBtn", function () {
+        var AssignmentId = parseInt($(this).attr("data-Assignment-id"));
+        var $el = $(`[data-saveable-${AssignmentId}]`);
+
+        assignmentTrCancel($el, AssignmentId);
+
+        $.ajax({
+            url: "/CustomerCases/GetAssignment",
+            data: { "AssignmentId": AssignmentId },
+            success: function (data) {
+                $(`#timeregTitle-${AssignmentId}`).text(data.Title);
+                $(`#timeregDateTime-start-${AssignmentId}`).text(moment(new Date(parseInt((data.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm"));
+                $(`#timeregDateTime-end-${AssignmentId}`).text(moment(new Date(parseInt((data.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm"));
+                $(`#${AssignmentId}-assignment`).text(data.CaseAssignment.Title);
+                $(`#timeregDescription-${AssignmentId}`).text(data.Description);
+            },
+            error: function (data) {
+                toastr.error("Error");
+            }
+        });
+    });
+
+    $(document).on("click", "#assignmentTableReload", function () {
+        let id = parseInt($("#assignmentTableReload").attr("data-caseId"));
+        $("#otherAssignment").empty();
+        getAssignmentsTable(id);
+    });
+    $(document).on("click", "#assignmentDoneTableReload", function () {
+        let id = parseInt($("#assignmentTableReload").attr("data-caseId"));
+        getAssignmentsTable(id);
+    });
+    $(document).on("click", ".deleteAssignmentBtn", function () {
+            console.log("Delete assignment");
+            var AssignmentId = parseInt($(this).attr("data-Assignment-id"));
+            $.SmartMessageBox({
+                    title: "@TimeReg.Delete?",
+                    content: "@TimeReg.RUSure @TimeReg.TimeRegistration",
+                    buttons: "[@TimeReg.No][@TimeReg.Yes]"
+                },
+                function(ButtonPressed) {
+                    if (ButtonPressed === "@TimeReg.Yes") {
+
+                        $.ajax({
+                            url: "/CustomerCases/DeleteCaseAssignment",
+                            data: { AssignmentId: AssignmentId },
+                            success: function(data) {
+                                //getAssignmenttable($("#AssignmentModal").attr("data-caseId"));
+                                $(`.AssignmentRemove${AssignmentId}`).fadeOut(300, function() { $(this).remove(); });
+                            },
+                            error: function(data) {
+                                toastr.error("@TimeReg.Delete @Customer.failed");
+
+                            }
+                        });
+                    }
+                    if (ButtonPressed === "@TimeReg.No") {
+                        $.smallBox({
+                            iconSmall: "fa fa-times fa-2x fadeInRight animated",
+                            timeout: 4000
+                        });
+                    }
+                }
+            );
+    });
+    /*
+    $(document).on("click", ".assignmentsBtn", function () {
+
+        const caseId = $(this).attr("data-case-id");
+        $("#AssignmentModal").modal("show");
+        $("#AssignmentModal").attr("data-caseId", $(this).attr("data-case-id"));
+        $("#assignmentEstimatedHour-spinner").spinner();
+        $("#assignmentEstimatedMinute-spinner").spinner();
+        $("#assignmentEstimatedHour-spinner").spinner({
+            step: 1.0,
+            numberFormat: "n",
+            min: 0
+        });
+        $("#assignmentEstimatedMinute-spinner").spinner({
+            step: 5.0,
+            numberFormat: "n",
+            min: 0,
+            max: 59
+        });
+        $("#assignmentEstimatedMinute-spinner").parent().css("width", "46%");
+        $("#assignmentEstimatedHour-spinner").parent().css("width", "46%");
+        clearAssignmentModal();
+        $("#assignmentResponsible").empty();
+        $("#otherAssignment").empty();
+
+
+        $("#assignmentTableReload").attr("data-caseId", caseId);
+       // getAssignmentsTable(caseId);
+        getUsersNames($("#assignmentResponsible"));
+    });
+    */
+    $(document).on("click", ".Assignment", function () {
+        const tr = $(this).parent()[0];
+        const id = $(tr).attr("data-assignmentId");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#Assignment${id}`).show();
+        } else {
+            $(`#Assignment${id}`).hide();
+        }
+    });
+
+    $("#caseModal").on("hidden.bs.modal", function () {
+        $("#caseModal").attr("data-caseId", "");
+        $("#caseModal").attr("data-customerId", "");
+    });
+
+    $(document).on("click", "tbody tr[role='row']", function (event) {
+        var tr = $(this).closest('tr');
+
+        var row;
+        switch (tr.parent()[0].id) {
+            case "pendingTbody":
+                row = pendingtable.row(tr);
+                break;
+            case "-1Tbody":
+                row = minus1table.row(tr);
+                break;
+            case "0Tbody":
+                row = zerotable.row(tr);
+                break;
+            case "1Tbody":
+                row = plus1table.row(tr);
+                break;
+            case "2Tbody":
+                row = plus2table.row(tr);
+                break;
+
+        }
+
+            var caseid = tr.attr('caseid');
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                $.ajax({
+                    url: "/CustomerCases/GetDetailed",
+                    data: { caseId: parseInt(tr.attr("caseId")) },
+
+                    success: function (data) {
+
+                        row.child(showCaseDetails(data)).show();
+                        tr.addClass('shown');
+
+                        if (!tr.hasClass("greenClass")) {
+                            tr.css("background", "");
+
+                        }
+                        var slider = document.getElementById(`listSlider_${data.Id}`);
+                        noUiSlider.create(slider,
+                            {
+                                start: [data.Done],
+                                connect: [true, false],
+                                tooltips: [true],
+                                step: 1,
+                                range: {
+                                    'min': [0],
+                                    'max': [100]
+                                }
+                            });
+
+                        if (data.CustomerContactId != null) {
+                            $(`#${caseid}-contact`).text(data.contact.Name);
+                        }
+                        $(`#${caseid}-startDate`).text(data.Started);
+                        if (data.Ended != null) {
+                            $(`#${caseid}-endDate`).text(data.Ended);
+                        }
+                        $(`#${caseid}-description`).text(data.Description);
+                        $(`#${caseid}-CaseId`).text(data.Id);
+                        $(`#${caseid}-slider`).slider("setValue", data.Done);
+                        $(`#${caseid}-slider`).css("margin-bottom", 0);
+                        $(`#${caseid}-contact`).text(data.Contact);
+
+
+
+                    },
+                    error: function () {
+                        toastr.error("Something went wrong");
+                    },
+                })
+
+            }
+        });
+    $(document).on("click", ".endBtn", function () {
+        const now = moment();
+        const caseId = parseInt($(this).attr("data-case-id"));
+        $.ajax({
+                url: "/CustomerCases/EndCase",
+                data: { CaseId: caseId, EndDateTime: now.toISOString() },
+                    success: function (data) {
+                        //reloadMainTable(); //$("#customerCasesList").html(data);
+                        pendingtable.ajax.reload();
+                    },
+                    error: function (data) {
+                        toastr.error("@Customer.Ending @Customer.failed");
+                    }
+        });
+    });
+    $(document).on("click", "#saveCaseBtn", function () {
+
+        var $btn = $(this).button("loading");
+        const caseModal = $("#caseModal");
+        const contactPerson = parseInt($("#contactPerson").val()) || null;
+        const caseTypeID = parseInt($("#caseTypes").val()) || null;
+        const customerID = parseInt($('#customerSelect').val()) || null;
+        let customerCase = {
+            "Id": parseInt(caseModal.attr("data-caseId")),
+            "CustomerCaseTypeId": caseTypeID,
+            "CustomerContactId": contactPerson,
+            "CustomerId": customerID,
+            "UserId": $("#caseResponsible").val(),
+            "StartDateTime": $("#caseStartDate").data("DateTimePicker").date().toISOString(),
+            "Deadline": $("#caseDeadlineDate").data("DateTimePicker").date().toISOString(),
+            "Titel": $("#caseTitle").val(),
+            "Description": $("#caseDescription").val(),
+            "EstimatedTimeSpanIsoString": moment.duration({
+                minutes: $(`#estimatedTimeMinute-spinner`).val(),
+                hours: $(`#estimatedTimeHour-spinner`).val()
+            }).toISOString(),
+            "PercentDone": parseInt(editSlider.noUiSlider.get()),
+            "ProjectResponsibleId": $("#projectLeader").val(),
+            "Status": $("#Status").val(),
+            "Week": getWeekString()
+        };
+        if (caseModal.attr("data-caseId") === "") {
+
+             $.ajax({
+                url: "/CustomerCases/Create",
+                type: "POST",
+                data: { 'customerCase': customerCase },
+                success: function (data) {
+
+                    emptycaseModal();
+                    caseModal.modal('hide');
+                            reloadTables();
+
+                    $btn.button("reset");
+                    caseModal.attr("data-caseId", "");
+                    toastr.success("@General.CaseCreated")
+                    reloadTables();
+
+                },
+                error: function () {
+                    toastr.error("@Customer.Edit @Customer.failed");
+                    $btn.button("reset");
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: "/CustomerCases/Edit",
+                type: "POST",
+                data: { 'customerCase': customerCase },
+                success: function (data) {
+
+                    emptycaseModal();
+                    caseModal.modal('hide');
+                            reloadTables();
+
+                    $btn.button("reset");
+                    caseModal.attr("data-caseId", "");
+                    reloadTables();
+                },
+                error: function () {
+                    toastr.error("@Customer.Edit @Customer.failed");
+                    $btn.button("reset");
+                }
+            });
+       }
+    });
+    $(document).on("click", "#estimatedSliderBtn", function () {
+        var caseId = $(this).attr("data-case-id");
+        var percentDone = parseInt(window[`listSlider_${caseId}`].noUiSlider.get());
+        $.ajax({
+            url: "/CustomerCases/UpdatePercentDone",
+            type: "Post",
+            data: { 'caseId': caseId, "PercentDone": percentDone },
+            success: function (data) {
+                toastr.success(data.responseText);
+
+                $(`#${caseId}-progressbar`).attr("data-progressbar-value", percentDone);
+            },
+            error: function (data) {
+                toastr.error("@Customer.failed");
+
+            }
+        });
+    });
+
+    $(document).on("click", "#yearOutBtn", function () {
+        $("#caseDeadlineDate").data("DateTimePicker").date(moment("31-12", "DD-MM"));
+    });
+    $(document).off("click", ".editBtn");
+    $(document).on("click", ".editBtn", function () {
+        var caseId = $(this).attr("data-case-id");
+        var customerId = $(this).attr("data-customer-id");
+        emptycaseModal();
+        $.ajax({
+            url: "/CustomerCases/GetCase",
+            data: { 'caseId': parseInt(caseId) },
+            dataType: "json",
+            success: function (response) {
+                $('#customerSelect').val(customerId); // Select the option with a value of '1'
+                $('#customerSelect').trigger('change');
+                $("#caseModal").attr("data-customerId", customerId);
+                $("#caseModal").attr("data-caseId", caseId);
+                /*"CustomerCaseTypeId":*/
+                $(`#caseTypes`).val(response.Case.CustomerCaseTypeId);
+                /*"CustomerContactId":*/
+                $(`#contactPerson`).val(response.Case.CustomerContactId);
+                /*"UserId": */
+                $(`#caseResponsible`).val(response.Case.UserId);
+                $(`#projectLeader`).val(response.Case.ProjectResponsibleId);
+                $(`#Status`).val(response.Case.Status);
+                /*"StartDateTime": */
+                if (response.Case.StartDateTime != null) {
+                    ($("#caseStartDate").data("DateTimePicker")
+                        .date(new Date(parseInt((response.Case.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))));
+                }
+                /*"Deadline": */
+                if (response.Case.Deadline != null) {
+                    $("#caseDeadlineDate").data("DateTimePicker")
+                        .date(new Date(parseInt(response.Case.Deadline.replace(/\/Date\((-?\d+)\)\//, "$1"))));
+                }
+                /*"Titel":*/
+                $("#caseTitle").val(response.Case.Titel);
+                /*"Description":*/
+                $("#caseDescription").val(response.Case.Description);
+                /*"EstimatedTimeSpan":*/
+                let dur = moment.duration(response.Case.EstimatedTimeSpanIsoString).format("HH:mm", { trim: false }).split(":");
+                $("#estimatedTimeHour-spinner").val(dur[0]);
+                $("#estimatedTimeMinute-spinner").val(dur[1]);
+                /*"PercentDone":*/
+                editSlider.noUiSlider.set(response.Case.PercentDone);
+                if (response.Case.Week != null) {
+                    var weekArray = response.Case.Week.split("/");
+                    console.log(weekArray);
+                    setWeekTo(weekArray[0], weekArray[1]);
+                }
+            },
+            error: function () {
+                toastr.error("Could not fetch case");
+            }
+        });
+        $("#caseModal").modal("show");
+    });
+
+        //===============Driving Registration===============//
+    //#region DrivingReg
+    //Open and closes DrivingReg
+    $(document).off("click", ".DrivingReg");
+    $(document).on("click", ".DrivingReg", function () {
+        const tr = $(this).parent()[0];
+        const id = $(tr).attr("data-caseid");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#DrivingReg${id}`).show();
+        } else {
+            $(`#DrivingReg${id}`).hide();
+        }
+    });
+
+    // Opens Drivingreg Modal
+    $(document).off("click", ".drivingRegBtn");
+
+    $(document).on("click", ".drivingRegBtn", function () {
+        const caseId = $(this).attr("data-case-id");
+        $("#DrivingRegModal").modal("show");
+        $("#DrivingRegModal").attr("data-caseId", caseId);
+
+      //  getAssignmentsDropdown(caseId, $("#timeRegAssignment"));
+    });
+
+    //save driving registration
+    $("#saveDrivingRegBtn").click(function() {
+        var $btn = $(this).button("loading");
+        var caseId = $("#DrivingRegModal").attr("data-caseId");
+        var dateOfDrive = $("#drivingRegDescription").data("DateTimePicker").date().toISOString();
+        const drivingReg = {
+            "Id": null,
+            "dateOfDrive": dateOfDrive,
+            "CustomerCaseId": caseId,
+            "Description": $("#timeRegDescription").val(),
+        };
+        $.ajax({
+            url: "/CustomerCases/CreateTimeReg",
+            type: "Post",
+            data: { 'drivingReg': drivingReg, "startTime": startTime, "endTime": endTime },
+            success: function(data) {
+                const oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+                const newTimeEstimate = oldTimeEstimate.add(moment.duration(moment(endTime).diff(moment(startTime))));
+                $(`#${caseId}-TotalTimeUsed`).text(`${moment.duration(newTimeEstimate).format("HH:mm", { trim: false })}`);
+
+                $btn.button("reset");
+
+                toastr.success("@TimeReg.Saved");
+                getTimeRegtable($("#TimeRegModal").attr("data-caseId"));
+                clearTimeRegModal();
+
+            },
+            error: function() {
+                $btn.button("reset");
+                toastr.error("@TimeReg.Saving @Customer.failed");
+            }
+        });
+    });
+
+    //===============Time Reg===============//
+    //#region TimeReg
+    //Open and closes TimeReg
+    $(document).off("click", ".TimeReg");
+    $(document).on("click", ".TimeReg", function() {
+            const tr = $(this).parent()[0];
+            const id = $(tr).attr("data-caseid");
+            $(tr).toggleClass("shown");
+            if ($(tr).hasClass("shown")) {
+                $(`#timeReg${id}`).show();
+            } else {
+                $(`#timeReg${id}`).hide();
+            }
+        });
+
+    // Opens Timereg Modal
+    $(document).off("click", ".timeRegBtn");
+    $(document).on("click", ".timeRegBtn", function () {
+        const caseId = $(this).attr("data-case-id");
+        $("#TimeRegModal").modal("show");
+        $("#TimeRegModal").attr("data-caseId", caseId);
+        getTimeRegtable(caseId);
+        $("#timeregTableReload").attr("data-caseId", caseId);
+        getAssignmentsDropdown(caseId, $("#timeRegAssignment"));
+    });
+
+    $(document).off("click", "#timeregTableReload");
+    $(document).on("click", "#timeregTableReload", function () { getTimeRegtable(parseInt($("#timeregTableReload").attr("data-caseId")));});
+
+    function getTimeRegtable(caseId) {
+            $("#timeRegTBody").empty();
+            $.ajax({
+                url: "/CustomerCases/GetCaseTimeRegs",
+                data: { 'caseId': caseId },
+                dataType: "json",
+                success: function(data) {
+                    $.each(data.TimeRegsList,
+                        function(i, item) {
+                            var caseAssignmentTitle = "None";
+                            if (item.CaseAssignment != null) {
+                                caseAssignmentTitle = item.CaseAssignment.Title;
+                            };
+                            $("#timeRegTable").append(
+                                `<tr data-caseid="${item.Id}" class="TimeRegRemove${item.Id} even expandCollapseDetails">
+                                    <td id="timeregDateTime-start-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                    <td id="timeregDateTime-end-${item.Id}" data-editable-${item.Id}>${moment(new Date(parseInt((item.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                    <td>${item.User.FirstName} ${item.User.LastName}</td>
+                                    <td id="${item.Id}-interval">${moment.duration(item.Interval).format("hh:mm", { trim: false })}</td>
+                                    <td style="width: 15px" class="details-control TimeReg"></td>
+
+                                    <tr class="TimeReg TimeRegRemove${item.Id}" id="timeReg${item.Id}" style="display: none"><td colspan="6">
+                                        <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                            <tbody>
+                                                <tr>
+                                                    <td>@Customer.Assignment:</td>
+                                                    <td style="max-width:150px; word-wrap:break-word" id="${item.Id}-assignment" data-editable-${item.Id}>${caseAssignmentTitle}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>@TimeReg.Description:</td><td style="max-width:150px; word-wrap:break-word" id="timeregDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="${item.Id}-actions">
+                                                        <button id="${item.Id}-editTimeRegBtn" style="margin-right: 10px" data-timeReg-id="${item.Id}" class="btn btn-xs editTimeRegBtn btn-info pull-left">@TimeReg.Edit</button>
+                                                        <button id="${item.Id}-DeleteBtn" data-timeReg-id="${item.Id}" class="btn btn-xs deleteTimeRegBtn btn-danger pull-left">@TimeReg.Delete</button>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        </td>
+                                    </tr>
+                                </tr>`);
+                        });
+                },
+                error: function() {
+                    toastr.error("Could not fetch Time Registration");
+                }
+            });
+    }
+
+    //saves new Timereg
+    $("#saveTimeRegBtn").click(function() {
+        var $btn = $(this).button("loading");
+        var caseId = $("#TimeRegModal").attr("data-caseId");
+        var startTime = $("#timeRegStart").data("DateTimePicker").date().toISOString();
+        var endTime = $("#timeRegEnd").data("DateTimePicker").date().toISOString();
+        const timeReg = {
+            "Id": null,
+            "startTime": $("#timeRegStart").data("DateTimePicker").date().toISOString(),
+            "endTime": $("#timeRegEnd").data("DateTimePicker").date().toISOString(),
+            "CustomerCaseId": caseId,
+            "CaseAssignmentId": $("#timeRegAssignment").val(),
+            "Description": $("#timeRegDescription").val(),
+            "Title": $("#timeRegTitle").val(),
+            "UserId": $("#hiddenCurrentUserId").val()
+        };
+        $.ajax({
+            url: "/CustomerCases/CreateTimeReg",
+            type: "Post",
+            data: { 'timeReg': timeReg, "startTime": startTime, "endTime": endTime },
+            success: function(data) {
+
+                const oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+                const newTimeEstimate = oldTimeEstimate.add(moment.duration(moment(endTime).diff(moment(startTime))));
+                $(`#${caseId}-TotalTimeUsed`).text(`${moment.duration(newTimeEstimate).format("HH:mm", { trim: false })}`);
+
+                $btn.button("reset");
+
+                toastr.success("@TimeReg.Saved");
+                getTimeRegtable($("#TimeRegModal").attr("data-caseId"));
+                clearTimeRegModal();
+
+            },
+            error: function() {
+                $btn.button("reset");
+                toastr.error("@TimeReg.Saving @Customer.failed");
+            }
+        });
+    });
+
+    //clears modal when closed
+    $("#TimeRegModal").on("hidden.bs.modal", function() {
+            $("#TimeRegModal").attr("data-caseId", "");
+            clearTimeRegModal();
+    });
+
+    // Timereg Are you sure you want to close?
+    $("#TimeRegModal").on("hide.bs.modal", function (e) {
+        if (!jQuery.isEmptyObject($("#timeRegTitle").val()) ||
+        !jQuery.isEmptyObject($("#timeRegDescription").val())) {
+
+            if (!confirm("@Customer.RUSureClose")) return false;
+            };
+});
+
+    function clearTimeRegModal() {
+
+        $("#timeRegTitle").val("");
+        $("#timeRegDescription").val("");
+        $("#timeRegStart").val("");
+        $("#timeRegEnd").val("");
+        $("#timeRegAssignment").empty();
+        $("#timeRegTBody").empty();
+    }
+
+    // Deletes a timereg
+    $(document).off("click", ".deleteTimeRegBtn");
+    $(document).on("click",".deleteTimeRegBtn",
+        function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var caseId = $("#TimeRegModal").attr("data-caseId");
+            var oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+            $.SmartMessageBox({
+                    title: "@TimeReg.Delete?",
+                    content: "@TimeReg.RUSure @TimeReg.TimeRegistration",
+                    buttons: "[@TimeReg.No][@TimeReg.Yes]"
+                },
+                function(ButtonPressed) {
+                    if (ButtonPressed === "@TimeReg.Yes") {
+
+                        $.ajax({
+                            url: "/CustomerCases/DeleteTimeReg",
+                            data: { timeRegId: timeRegId },
+                            success: function(data) {
+                                $(`.TimeRegRemove${timeRegId}`).fadeOut(300, function() { $(this).remove(); });
+
+                                const newTimeEstimate =
+                                    oldTimeEstimate.subtract(moment.duration($(`#${timeRegId}-interval`).text()));
+                                $(`#${caseId}-TotalTimeUsed`)
+                                    .text(`${moment.duration(newTimeEstimate).format("HH:mm", { trim: false })}`);
+                            },
+                            error: function(data) {
+                                toastr.error("Delete failed");
+
+                            }
+                        });
+                    }
+                    if (ButtonPressed === "@TimeReg.No") {
+                        $.smallBox({
+                            iconSmall: "fa fa-times fa-2x fadeInRight animated",
+                            timeout: 4000
+                        });
+                    }
+                }
+            );
+
+        });
+
+    //Makes it so a user can edit a timereg
+    $(document).off("click", ".editTimeRegBtn");
+    $(document).on("click",".editTimeRegBtn",function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var $el = $(`[data-editable-${timeRegId}]`);
+            $(this).replaceWith(
+                `<button id="${timeRegId}-saveTimeRegBtn" style="margin-right: 10px" data-timeReg-id="${timeRegId
+                }" class="btn btn-xs editSaveTimeRegBtn btn-success pull-left">@TimeReg.Save</button>
+                <button id="${timeRegId}-cancelTimeRegBtn" data-timeReg-id="${timeRegId}" style="margin-right: 10px" class="btn btn-xs cancelTimeRegBtn btn-normal pull-left">@TimeReg.Cancel</button>`);
+            $.each($el,
+                function(i, item) {
+                    const $width = $($el[i]).width();
+                    const $id = $($el[i]).prop("id");
+                    if ($id === `${timeRegId}-assignment`) {
+                        $(item).attr(`data-saveable-${timeRegId}`, "");
+                        $(item).removeAttr(`data-editable-${timeRegId}`);
+                        const content = $("#timeRegAssignment").clone();
+                        $(`#${timeRegId}-assignment`).empty();
+                        $(`#${timeRegId}-assignment`).append(content);
+                    } else {
+                        const $td = $(`<td style='width: ${$width}px'> </td>`);
+                        const $input =
+                            $(`<input class="form-control datepicker" id="${$id}" data-saveable-${timeRegId} style="width:${$width
+                                }px"/>`).val($(item).text());
+
+                        $($td).append($input);
+                        $(item).replaceWith($td);
+                    }
+                });
+            $(`#timeregDateTime-start-${timeRegId}`).datetimepicker({
+                locale: "da",
+                sideBySide: true
+            });
+
+            $(`#timeregDateTime-end-${timeRegId}`).datetimepicker({
+                locale: "da",
+                sideBySide: true,
+            });
+
+        $(`#timeregDateTime-end-${timeRegId}`).on("dp.change",
+            function (e) {
+
+                $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").maxDate(e.date);
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date()
+                    .toISOString();
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${timeRegId}-interval`).text(moment
+                    .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds())
+                    .format("HH:mm"));
+            });
+
+        $(`#timeregDateTime-start-${timeRegId}`).on("dp.change",
+            function (e) {
+                $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").minDate(e.date);
+                const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date()
+                    .toISOString();
+                const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${timeRegId}-interval`).text(moment
+                    .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds())
+                    .format("HH:mm"));
+            });
+        });
+
+    //returns the timereg to normal
+    $(document).off("click", ".cancelTimeRegBtn");
+    $(document).on("click",".cancelTimeRegBtn",function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var $el = $(`[data-saveable-${timeRegId}]`);
+            $(this).replaceWith(
+                `<button id="${timeRegId}-editTimeRegBtn" data-timeReg-id="${timeRegId
+                }" class="btn btn-xs editTimeRegBtn btn-info pull-left">@Customer.Edit</button> `);
+            $(`#${timeRegId}-saveTimeRegBtn`).remove();
+
+            $.each($el,
+                function(i, item) {
+                    const $id = $($el[i]).prop("id");
+                    if ($id === `${timeRegId}-assignment`) {
+                        const selected = $(item).children().find(":selected").text();
+                        $(`#${timeRegId}-assignment`).empty();
+                        $(`#${timeRegId}-assignment`).append(selected);
+                        $(item).attr(`data-editable-${timeRegId}`, "");
+                        $(item).removeAttr(`data-saveable-${timeRegId}`);
+
+                    } else {
+
+                        const $td = $(`<td data-editable-${timeRegId} id=${$id}>${$(item).val()} </td>`);
+
+                        $(item).parent().replaceWith($td);
+                    }
+
+            });
+            $.ajax({
+                url: "/Timeregistration/GetTimeReg",
+                type: "Get",
+                data: { "TimeRegId": timeRegId },
+                success: function (data) {
+                    const timeStart = new Date(parseInt((data.TimeReg.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                    const timeEnd = new Date(parseInt((data.TimeReg.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                    $(`#timeregDateTime-start-${timeRegId}`).text(
+                        moment(timeStart)
+                        .format("DD.MM.YYYY HH:mm"));
+                    $(`#timeregDateTime-end-${timeRegId}`)
+                        .text(moment(timeEnd)
+                            .format("DD.MM.YYYY HH:mm"));
+
+                    $(`#${timeRegId}-interval`).text(moment
+                        .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds())
+                        .format("HH:mm"));
+
+                    $(`#${timeRegId}-assignment`).text(data.CaseAssignment.Title);
+                    $(`#timeregDescription-${timeRegId}`).text(data.Description);
+                },
+                error: function (data) {
+                    toastr.error("Error");
+                }
+        });
+        });
+
+    //Saves the edited timereg
+    $(document).off("click", ".editSaveTimeRegBtn");
+
+    $(document).on("click", ".editSaveTimeRegBtn",
+        function() {
+            var timeRegId = parseInt($(this).attr("data-timeReg-id"));
+            var $el = $(`[data-saveable-${timeRegId}]`);
+            $(this).replaceWith(`<button id="${timeRegId}-editTimeRegBtn" data-timeReg-id="${timeRegId
+                }" class="btn btn-xs editTimeRegBtn btn-info pull-left">@Customer.Edit</button> `);
+            $(`#${timeRegId}-cancelTimeRegBtn`).remove();
+
+            const timeStart = $(`#timeregDateTime-start-${timeRegId}`).data("DateTimePicker").date().toISOString();
+            const timeEnd = $(`#timeregDateTime-end-${timeRegId}`).data("DateTimePicker").date().toISOString();
+            const assignmentId = $(`#${timeRegId}-assignment`).children().find(":selected").val();
+            $(`#${timeRegId}-interval`).text(moment
+                .utc(moment.duration(moment(timeEnd).diff(moment(timeStart))).asMilliseconds()).format("HH:mm"));
+            $.each($el,
+                function(i, item) {
+                    const $id = $($el[i]).prop("id");
+                    if ($id === `${timeRegId}-assignment`) {
+                        const selected = $(item).children().find(":selected").text();
+                        $(`#${timeRegId}-assignment`).empty();
+                        $(`#${timeRegId}-assignment`).append(selected);
+                        $(item).attr(`data-editable-${timeRegId}`, "");
+                        $(item).removeAttr(`data-saveable-${timeRegId}`);
+                    } else {
+                        const $td = $(`<td data-editable-${timeRegId} id=${$id}>${$(item).val()} </td>`);
+
+                        $(item).parent().replaceWith($td);
+                    }
+                });
+
+            const timeReg = {
+                "Id": timeRegId,
+                "Description": $(`#timeregDescription-${timeRegId}`).text(),
+                "CaseAssignmentId": parseInt(assignmentId),
+                "StartDateTime": timeStart,
+                "EndDateTime": timeEnd,
+            };
+            $.ajax({
+                url: "/CustomerCases/TimeRegEdit",
+                type: "Post",
+                data: { "timeReg": timeReg },
+                success: function(data) {
+                    toastr.success("Success");
+                },
+                error: function(data) {
+                    toastr.error("@Customer.Edit @Customer.failed");
+                }
+            });
+
+        });
+
+    //#endregion
+    //===============TimeReg End============//
+    //#endregion
+
+        var pendingtable = $('#pendingTable').DataTable({
+            ajax: {
+                url: "/CustomerCases/CasesForWeek",
+                data: { offset: "Pending" },
+                datatype: "json"
+            },
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('caseId', data.Id);
+                 if (data.Status === 2) {
+                    $(row).addClass('greenClass');
+                }
+            },
+            columns: [
+                {
+                    data: "Customer", render: function (data, type, row)
+                    {
+                        return data.CompanyName;
+                    },
+                    autoWidth: true
+                },
+                {
+                    data: "Titel", "name": "@Customer.Case / @Customer.Assignment",
+                    autoWidth: true
+                },
+
+                {
+                    data: "ProjectResponsible", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    },
+                    autoWidth: true
+                },
+                {
+                    data: "User", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    },
+                    autoWidth: true
+                },
+                {
+                    data: "Status", render: function (data, type, row) {
+                        return getStatusLabel(data);
+                    },
+                    autoWidth: true
+                },
+
+                {
+                    data: null, render: function (data, type, row) {
+                        return moment.duration(row.TotalTimeUsedIsoString).format("HH:mm", { trim: false }) + "(" + moment.duration(row.EstimatedTimeSpanIsoString).format("HH:mm", { trim: false })+")";
+
+                    },
+                    autoWidth: true
+                },
+                {
+                    data: "Deadline", render: function (data, type, row) {
+                        return moment(data, moment.ISO_8601).format("DD.MM.YYYY HH:mm");
+                    },
+                    autoWidth: true
+                },
+                {
+                    data: null,
+                    className: "details-control",
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return ``;
+                    },
+                    autowidth: true,
+
+                }
+            ]
+
+        });
+        var minus1table = $('#-1table').DataTable({
+            ajax: {
+                url: "/CustomerCases/CasesForWeek",
+                data: { offset: -1 },
+                datatype: "json"
+            },
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('caseId', data.Id);
+                if (data.Status === 2) {
+                    $(row).addClass('greenClass');
+                }
+            },
+            columns: [
+                {
+                    data: "Customer", render: function (data, type, row) {
+                        return data.CompanyName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "Titel", "name": "@Customer.Case / @Customer.Assignment", "autoWidth": true
+                },
+
+                {
+                    data: "ProjectResponsible", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "User", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "Status", render: function (data, type, row) {
+                        return getStatusLabel(data);
+                    }, "autoWidth": true
+                },
+
+                {
+                    data: null, render: function (data, type, row) {
+                        return moment.duration(row.TotalTimeUsedIsoString).format("HH:mm", { trim: false }) + "(" + moment.duration(row.EstimatedTimeSpanIsoString).format("HH:mm", { trim: false })+")";
+
+                    },
+                    "autoWidth": true
+                },
+
+                {
+                    data: "Deadline", render: function (data, type, row) {
+                        return moment(data, moment.ISO_8601).format("DD.MM.YYYY HH:mm");
+                    }, "autoWidth": true
+                },
+                {
+                    data: null,
+                    className: "details-control",
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return ``;
+                    },
+                    autowidth: true,
+                }
+            ]
+
+        });
+        var zerotable = $('#0table').DataTable({
+            ajax: {
+                url: "/CustomerCases/CasesForWeek",
+                data: { offset: 0 },
+                datatype: "JSON"
+            },
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('caseId', data.Id);
+                 if (data.Status === 2) {
+                    $(row).addClass('greenClass');
+                }
+            },
+            columns: [
+                {
+                    data: "Customer", render: function (data, type, row) {
+                        return data.CompanyName;
+                    }, "autoWidth": true
+                },
+                    { "data": "Titel", "name": "@Customer.Case / @Customer.Assignment", "autoWidth": true },
+
+                    {
+                        data: "ProjectResponsible", render: function (data, type, row) {
+                            return data.FirstName +" "+data.LastName;
+                        }, "autoWidth": true
+                    },
+                    {
+                        data: "User", render: function (data, type, row) {
+                            return data.FirstName +" "+data.LastName;
+                        }, "autoWidth": true
+                    },
+                    {
+                        data: "Status", render: function (data, type, row) {
+                            return getStatusLabel(data);
+                        }, "autoWidth": true
+                    },
+
+                      { "data": null, render: function (data, type, row) {
+                              return moment.duration(row.TotalTimeUsedIsoString).format("HH:mm", { trim: false }) + "(" + moment.duration(row.EstimatedTimeSpanIsoString).format("HH:mm", { trim: false })+")";
+
+                    },
+                          "autoWidth": true
+                    },
+
+                       {
+                           data: "Deadline", render: function (data, type, row) {
+                               return moment(data, moment.ISO_8601).format("DD.MM.YYYY HH:mm");
+                           }, "autoWidth": true
+                       },
+                       {
+                    data: null,
+                    className: "details-control",
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return ``;
+                    },
+                    autowidth: true,
+
+                }
+
+
+                ]
+
+            });
+        var plus1table = $('#1table').DataTable({
+            ajax: {
+                url: "/CustomerCases/CasesForWeek",
+                data: { offset: +1 },
+                datatype: "json"
+            },
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('caseId', data.Id);
+                if (data.Status === 2) {
+                    $(row).addClass('greenClass');
+                }
+            },
+            "columns": [
+                {
+                    data: "Customer", render: function (data, type, row) {
+                        return data.CompanyName;
+                    }, "autoWidth": true
+                },
+                { "data": "Titel", "name": "@Customer.Case / @Customer.Assignment", "autoWidth": true },
+
+                {
+                    data: "ProjectResponsible", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "User", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "Status", render: function (data, type, row) {
+                        return getStatusLabel(data);
+                    }, "autoWidth": true
+                },
+
+                { "data": null, render: function (data, type, row) {
+                        return moment.duration(row.TotalTimeUsedIsoString).format("HH:mm", { trim: false }) + "(" + moment.duration(row.EstimatedTimeSpanIsoString).format("HH:mm", { trim: false })+")";
+
+                    },
+                    "autoWidth": true
+                },
+
+                {
+                    data: "Deadline", render: function (data, type, row) {
+                        return moment(data, moment.ISO_8601).format("DD.MM.YYYY HH:mm");
+                    }, "autoWidth": true
+                },
+                {
+                    data: null,
+                    className: "details-control",
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return ``;
+                    },
+                    autowidth: true,
+
+                }
+
+
+            ]
+
+        });
+        var plus2table= $('#2table').DataTable({
+            ajax: {
+                url: "/CustomerCases/CasesForWeek",
+                data: { offset: +2 },
+                datatype: "json"
+            },
+            createdRow: function (row, data, dataIndex) {
+                $(row).attr('caseId', data.Id);
+                 if (data.Status === 2) {
+                    $(row).addClass('greenClass');
+                }
+            },
+            columns: [
+                {
+                    data: "Customer", render: function (data, type, row) {
+                        return data.CompanyName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "Titel", "name": "@Customer.Case / @Customer.Assignment",
+                    autoWidth: true
+                },
+
+                {
+                    data: "ProjectResponsible", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "User", render: function (data, type, row) {
+                        return data.FirstName +" "+data.LastName;
+                    }, "autoWidth": true
+                },
+                {
+                    data: "Status", render: function (data, type, row) {
+                        return getStatusLabel(data);
+                    }, "autoWidth": true
+                },
+
+                {
+                    data: null, render: function (data, type, row) {
+                        return moment.duration(row.TotalTimeUsedIsoString).format("HH:mm", { trim: false }) + "(" + moment.duration(row.EstimatedTimeSpanIsoString).format("HH:mm", { trim: false })+")";
+                    }, "autoWidth": true
+                },
+
+                {
+                    data: "Deadline", render: function (data, type, row) {
+                        return moment(data, moment.ISO_8601).format("DD.MM.YYYY HH:mm");
+                    }, "autoWidth": true
+                },
+                {
+                    data: null,
+                    className: "details-control",
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return ``;
+                    },
+                    autowidth: true,
+
+                }
+
+
+            ]
+
+        });
+
+        function getStatusLabel(int) {
+            switch (int) {
+                case 0:
+                    return "<span class='label label-danger'>@CustomerCase.NotPlanned</span>";
+                case 1:
+                    return "<span class='label label-primary'>@CustomerCase.Igang</span>";
+                case 2:
+                    return "<span class='label label-success'>@CustomerCase.Afsluttet</span>";
+                case 3:
+                    return "<span class='label label-default'>@CustomerCase.Afventer</span>";
+                case 4:
+                    return "<span class='label label-default'>@CustomerCase.AfventerKunde</span>";
+                case 5:
+                    return "<span class='label label-default'>@CustomerCase.Afventer3part</span>";
+                case 6:
+                    return "<span class='label label-warning'>@CustomerCase.Pause</span>";
+                default:
+                    return "null";
+            }
+    }
+
+    function reloadTables() {
+        pendingtable.ajax.reload();
+        minus1table.ajax.reload();
+        zerotable.ajax.reload();
+        plus1table.ajax.reload();
+        plus2table.ajax.reload();
+    }
+
+    setInterval(function () {
+        if ($('#caseModal').hasClass('in')) {
+            reloadTables();
+        }
+    }, 300000);//5 min
+</script>
+@*@if (!AuthorizationService.AuthorizeRenderHTML("Edit", "CustomerCases"))
+{
+    <script>
+        $(document).ready(function () {
+            $("._popup").remove();
+        });
+    </script>
+}*@

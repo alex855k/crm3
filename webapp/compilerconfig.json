@@ -1,0 +1,14 @@
+﻿[
+  {
+    "outputFile": "Content/css/your_style.css",
+    "inputFile": "Content/css/your_style.less"
+  },
+  {
+    "outputFile": "Scripts/app.seed.es5.js",
+    "inputFile": "Scripts/app.seed.js"
+  },
+  {
+    "outputFile": "Scripts/CRM/Orders/CreateOrder.es5.js",
+    "inputFile": "Scripts/CRM/Orders/CreateOrder.js"
+  }
+]

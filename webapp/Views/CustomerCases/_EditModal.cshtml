@@ -1,0 +1,124 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using CRM.Application.Core.Resources.General
+@using CRM.Application.Core.Resources.TimeRegistrations
+@using DateTime = CRM.Application.Core.Resources.General.DateTime
+@model CRM.Application.Core.ViewModels.CustomerCaseViewModel
+@{
+    Layout = null;
+}
+
+<div class="modal-dialog">
+    <div class="modal-content" id="modalContent">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                &times;
+            </button>
+            <h4 class="modal-title" id="myModalLabel">@CustomerCase.NewCustomerCase</h4>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="category">@Customer.Title</label>
+                    <input type="text" class="form-control" id="caseTitle" placeholder="@Customer.Case @Customer.Title" required />
+                </div>
+                <div class="col-md-6">
+                    <label for="category">@Customer.Type</label>
+                    <select class="form-control" id="caseTypes"></select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="category">@Customer.Description</label>
+                        <textarea style="max-width: 558px; min-height: 33px; min-width: 558px;" class="form-control" id="caseDescription" placeholder="@Customer.Case @Customer.Description" rows="5" required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="category">@Customer.Status</label>
+                        <select class="form-control" id="Status">
+                            <option value="6">@CustomerCase.NotPlanned</option>
+                            <option value="0">@CustomerCase.Igang</option>
+                            <option value="2">@CustomerCase.Afventer</option>
+                            <option value="3">@CustomerCase.AfventerKunde</option>
+                            <option value="4">@CustomerCase.Afventer3part</option>
+                            <option value="5">@CustomerCase.Pause</option>
+                            <option value="1">@CustomerCase.Afsluttet</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div id="caseWeek" class="form-group">
+                        <label for="category">@Customer.ProjectLeader</label>
+                        <select class="form-control" id="projectLeader"></select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group week-picker"
+                         data-mode="single">
+                        <label for="category">Week Picker</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="category">@Customer.ContactPerson</label>
+                        <select class="form-control" id="contactPerson"></select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="category">@Customer.CaseResponsible</label>
+                        <select class="form-control" id="caseResponsible"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="caseStartDate">@Customer.Case Start</label>
+                    <input id="caseStartDate" placeholder="@TimeReg.Start @TimeReg.Date" class="form-control" type="text">
+                </div>
+                <div class="col-md-4">
+                    <label for="caseDeadlineDate">@Customer.Case Deadline</label>
+                    <input id="caseDeadlineDate" placeholder="@Customer.Case @Customer.Deadline" class="form-control" type="text">
+                </div>
+                <div class="col-md-2">
+                    <label for="caseDeadlineDate">@DateTime.YearOut</label>
+
+                    <button type="button" id="yearOutBtn" class="btn btn-lg fa fa-arrow-right" style="height: 32px;"></button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label for="estimatedTime-spinner">@DateTime.EstimatedTimeRequired</label>
+                    <input class=" col-md-2 form-control spinner-left" id="estimatedTimeHour-spinner" name="spinner" value="1"> <text> : </text>
+                    <input class="col-md-2 form-control spinner" id="estimatedTimeMinute-spinner" name="spinner" value="0">
+                </div>
+
+                <div class="col-md-8">
+                    <label for="slider-div">@DateTime.EstimatedPercentDone</label>
+                    <div id="slider-div" style="margin-top: 6px">
+                        <div id="g1-div" style="vertical-align: middle">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    @General.Cancel
+                </button>
+                <button type="button" data-loading-text="@TimeReg.Saving..." class="btn btn-primary" id="saveCaseBtn">
+                    @General.Save @Customer.Case
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>

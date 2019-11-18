@@ -1,0 +1,90 @@
+﻿@model CRM.Application.Core.ViewModels.ProcedureViewModel
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>CRM</title>
+    <style>
+        .procedureWrapper {
+            width: 100%;
+            min-height: 10px;
+            float: left;
+        }
+
+        .procedure {
+            width: 100%;
+            min-height: 50px;
+            float: left;
+            padding-bottom: 10px;
+            padding-top: 10px;
+        }
+
+            .procedure h1 {
+                margin: 0px 0px 0px 0px;
+                padding: 0px;
+                float: left;
+            }
+
+            .procedure img {
+                float: left;
+                margin-left: 25%;
+            }
+
+        .procedureItem {
+            width: 100%;
+            min-height: 100px;
+            float: left;
+            margin-bottom: 10px;
+            padding-bottom: 20px;
+        }
+
+            .procedureItem:not(:last-of-type) {
+                border-bottom: solid 1px #EEE;
+            }
+
+        .pull-right {
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    @if (Model.Id != 0)
+    {
+        <div class="procedureWrapper print">
+            @if (Model.ImagePath != "null" && Model.ImagePath != null && Model.ImagePath != "undefined")
+            {
+                <div class="procedure">
+                    <img src="@string.Format("{0}{1}", Model.ImageFolderPath,Model.ImagePath)" />
+                </div>
+            }
+            <div class="procedure">
+                <h1>@Model.Title</h1>
+                <span class="pull-right">Created: @Model.Created.ToLongDateString() @Model.Created.ToShortTimeString()</span>
+                @if (Model.Edited != null)
+                {
+                    <br />
+                    <span class="pull-right">Last edited: @Model.Edited.Value.ToLongDateString() @Model.Edited.Value.ToShortTimeString()</span>
+                }
+                <hr />
+            </div>
+            @foreach (var item in Model.ProcedureItems)
+            {
+                <div class="procedureItem">
+                    <div style="float: left;">
+                        <h2>@item.Title</h2>
+                        @if (item.ImagePath != "null" && item.ImagePath != null && item.ImagePath != "undefined")
+                        {
+                        <img src="@string.Format("{0}{1}", Model.ImageFolderPath, item.ImagePath)" />
+                            <br />
+                        }
+                        <span>
+                            @item.Description
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</body>
+</html>

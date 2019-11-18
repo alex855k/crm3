@@ -1,0 +1,188 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using CRM.Application.Core.Resources.DrivingRegistrations
+@{
+    Layout = null;
+}
+<div class="panel-group smart-accordion-default" id="accordion-2">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title"><a data-toggle="collapse" data-parent="#accordion-2" href="#collapseOne-1" aria-expanded="false" class="collapsed"> <i class="fa fa-fw fa-plus-circle txt-color-green"></i> <i class="fa fa-fw fa-minus-circle txt-color-red"></i>@DrivingReg.Create</a></h4>
+        </div>
+        <div id="collapseOne-1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group" style="padding-bottom: 6px ; height: 100%">
+                            <div class="input-group-addon">@DrivingReg.Customer</div>
+                            <select onchange="customerFormChange(this)" ; style="width: 100% !important" class="select2" id="customerFormSelect">
+                                <option value="null">-</option>
+                            </select>
+                        </div>
+                    </div>
+                        <div class="col-md-6">
+                            <div class="input-group" style="padding-bottom: 6px ;height: 100%">
+
+                                <div class="input-group-addon">@Customer.Case</div>
+                                <select class="select2" id="caseFormSelect"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="DrivingRegDescription">@DrivingReg.Description</label>
+                                <textarea class="form-control" id="DrivingRegDescription" placeholder="@DrivingReg.DrivingRegistration @DrivingReg.Description" rows="5" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="DrivingRegEnd">@DrivingReg.DrivingRegistration @DrivingReg.Date</label>
+                            <input id="DrivingRegDate" placeholder="@DrivingReg.Date " class="form-control" type="text">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="DrivingRegMileageStart">@DrivingReg.DrivingRegistration @DrivingReg.StartMileage</label>
+                            <input id="DrivingRegMileageStart" placeholder="@DrivingReg.StartMileage " class="form-control" type="text">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="DrivingRegMileageEnd">@DrivingReg.DrivingRegistration @DrivingReg.EndMileage</label>
+                            <input id="DrivingRegMileageEnd" placeholder="@DrivingReg.DrivingRegistration @DrivingReg.EndMileage" class="form-control" type="text">
+                        </div>
+                    </div>
+                </div>
+            <div class="modal-footer">
+                <div>
+                   <button type="button" data-loading-text="@DrivingReg.Saving..." class="btn btn-primary" id="saveDrivingRegBtn">
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<script type="text/javascript">
+
+    function clearDrivingRegForm() {
+        $("#drivingRegDescription").val("");
+        $("#drivingRegStartKm").val("");
+        $("#drivingRegEndKm").val("");
+    }
+
+    $(document).ready(function () {
+        debugger;
+        $("#DrivingRegStart").datetimepicker({
+            locale: "@DrivingReg.locale",
+            sideBySide: true
+        });
+        $("#DrivingRegEnd").datetimepicker({
+            locale: "@DrivingReg.locale",
+            sideBySide: true,
+        });
+
+        $("#DrivingRegEnd").on("dp.change",
+            function(e) {
+                $("#DrivingRegStart").data("DateTimePicker").maxDate(e.date);
+            });
+
+        $("#DrivingRegStart").on("dp.change",
+            function(e) {
+                $("#DrivingRegEnd").data("DateTimePicker").minDate(e.date);
+            });
+
+        loadCustomers();
+    });
+
+    $("#saveDrivingRegBtn").click(function () {
+        debugger
+        var $btn = $(this).button("loading");
+        var customerId = parseInt($('#customerFormSelect').val());
+        var caseId = parseInt($('#caseFormSelect').val());
+        var startTime = $("#DrivingRegStart").data("DateTimePicker").date().toISOString();
+        var endTime = $("#DrivingRegEnd").data("DateTimePicker").date().toISOString();
+        const DrivingReg = {
+            "Id": null,
+            "IsActive": false,
+            "Description": $("#DrivingRegDescription").val(),
+            "UserId": $("#hiddenUserId").val(),
+            "CustomerCaseId": caseId
+        };
+        $.ajax({
+            url: "/DrivingRegistration/CreateCaseDrivingReg",
+            type: "Post",
+            data: { 'DrivingReg': DrivingReg, "CustomerId": customerId, "startTime": startTime, "endTime": endTime },
+            success: function (data) {
+                $btn.button("reset");
+
+                toastr.success("Saved");
+                getDrivingRegtable($("#hiddenUserId").val());
+                if (typeof clearDrivingRegList === "function") {
+                    clearDrivingRegList();
+                }
+                clearDrivingRegForm();
+            },
+            error: function () {
+                $btn.button("reset");
+                toastr.error("Saving failed");
+            }
+        });
+    });
+
+    function loadCustomers() {
+        $.ajax({
+            url: "/Home/GetCustomerList",
+            type: "Post",
+            data: {},
+            success: function (data) {
+                
+                var list = data.customersList;
+                $('#customerFormSelect').select2('data', null);
+                $('#customerFormSelect').empty();
+                $.each(list, function(e, i) {
+                    var newOption = new Option(i.CompanyName, i.Id, false, false);
+                    $('#customerFormSelect').append(newOption).trigger('change');
+                });
+                
+            },
+            error: function(data) {
+
+            }
+        });
+    }
+
+    function customerFormChange(e) {
+        var id = e.value;
+        $.ajax({
+            url: "/Home/GetCustomerCaseList",
+            type: "Post",
+            data: { "id": id },
+            success: function (data) {
+                
+                var list = data.customerCasesList;
+                $('#caseFormSelect').select2('data', null);
+                $('#caseFormSelect').empty();
+                $.each(list, function(e, i) {
+                    var newOption = new Option(i.Titel, i.Id, false, false);
+                    $('#caseFormSelect').append(newOption).trigger('change');
+                });
+
+                if ($("#caseFormSelect option:contains('Generel')").length) {
+                    $('#caseFormSelect').val($("#caseFormSelect option:contains('Generel')").val()).trigger('change');
+                } else { 
+                    // Create a DOM Option and pre-select by default
+                    var newOption = new Option("Generel", null, true, true);
+                    // Append it to the select
+                    $('#caseFormSelect').append(newOption).trigger('change');
+                } 
+            },
+            error: function(data) {
+
+            }
+        });
+    }
+
+</script>

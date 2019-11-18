@@ -1,0 +1,104 @@
+﻿@using CRM.Application.Core.Resources.Customers;
+@using CRM.Application.Core.Resources.General;
+@{
+    var currentCulture = System.Globalization.CultureInfo.CurrentCulture;
+}
+
+<!-- collapse menu button -->
+<div id="hide-menu" class="btn-header pull-right">
+    <span> <a href="javascript:void(0);" data-action="toggleMenu" title="Collapse Menu"><i class="fa fa-reorder"></i></a> </span>
+</div>
+<!-- end collapse menu -->
+<!-- #MOBILE -->
+<!-- Top menu profile link : this shows only when top menu is active -->
+<ul id="mobile-profile-img" class="header-dropdown-list hidden-xs padding-5">
+    <li class="">
+        <a href="#" class="dropdown-toggle no-margin userdropdown" data-toggle="dropdown">
+            <img src="~/content/img/avatars/sunny.png" alt="John Doe" class="online" />
+        </a>
+        <ul class="dropdown-menu pull-right">
+            <li>
+                <a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-cog"></i> Setting</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+                <a href="#" class="padding-10 padding-top-0 padding-bottom-0"> <i class="fa fa-user"></i> @CRM.Application.Core.Resources.General.TopRight.Profile</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+                <a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0" data-action="toggleShortcut"><i class="fa fa-arrow-down"></i> <>S</>hortcut</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+                <a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0" data-action="launchFullscreen"><i class="fa fa-arrows-alt"></i> Full <>S</>creen</a>
+            </li>
+            <li class="divider"></li>
+            @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutMobileForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <li>
+                    <a href="javascript:document.getElementById('logoutMobileForm').submit()" class="padding-10 padding-top-5 padding-bottom-5" data-action="userLogout"><i class="fa fa-sign-out fa-lg"></i> <strong><>L</>ogout</strong></a>
+                </li>
+            }
+        </ul>
+    </li>
+</ul>
+
+<!-- logout button -->
+@using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "pull-right" }))
+{
+    @Html.AntiForgeryToken()
+    <div id="logout" class="btn-header transparent pull-right">
+        <span> <a href="javascript:document.getElementById('logoutForm').submit()" title="Sign Out" data-action="userLogout" data-logout-msg="You can improve your security further after logging out by closing this opened browser"><i class="fa fa-sign-out"></i></a> </span>
+    </div>
+}
+<!-- end logout button -->
+<!-- search mobile button (this is hidden till mobile view port) -->
+<div id="search-mobile" class="btn-header transparent pull-right">
+    <span> <a href="javascript:void(0)" title="Search"><i class="fa fa-search"></i></a> </span>
+</div>
+<!-- end search mobile button -->
+<!-- input: search field -->
+@if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("TopMenuSearch", "CRMFeatures"))
+{
+    <form action="@Url.Action("search", "misc")" class="header-search pull-right">
+        <input id="search-fld" type="text" name="param" placeholder="Find reports and more" data-autocomplete='["ActionScript","AppleScript","Asp","BASIC","C","C++","Clojure","COBOL","ColdFusion","Erlang","Fortran","Groovy","Haskell","Java","JavaScript","Lisp","Perl","PHP","Python","Ruby","Scala","Scheme"]'>
+        <button type="submit">
+            <i class="fa fa-search"></i>
+        </button>
+        <a href="javascript:void(0);" id="cancel-search-js" title="Cancel Search"><i class="fa fa-times"></i></a>
+    </form>
+}
+<!-- end input: search field -->
+<!-- fullscreen button -->
+@*<div id="fullscreen" class="btn-header transparent pull-right">
+        <span> <a href="javascript:void(0);" data-action="launchFullscreen" title="Full Screen"><i class="fa fa-arrows-alt"></i></a> </span>
+    </div>*@
+<div id="currentWeekCases" class="btn-header transparent pull-right">
+    <span> <a href="@Url.Action("CurrentWeek", "CustomerCases")" title="@CustomerCase.Cases for @General.ThisWeek.ToLower()"><i class="fa fa-arrows-alt"></i></a> </span>
+</div>
+<!-- end fullscreen button -->
+<!-- multiple lang dropdown : find all flags in the flags page -->
+@if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("TopMenuLanguage", "CRMFeatures"))
+{
+    <ul class="header-dropdown-list hidden-xs">
+        <li>
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <img src="~/content/img/blank.gif" class="flag flag-@(currentCulture.Name.ToLower().Equals("da-dk") ? "dk" : "us")" alt="">
+                <span>@currentCulture.NativeName</span>
+                <i class="fa fa-angle-down"></i>
+            </a>
+            <ul class="dropdown-menu pull-right">
+                <li class="@(currentCulture.Name.ToLower().Equals("En-US".ToLower()) ? "active" : "")">
+                    <a class="aLanguage" data-culture="en-GB" data-uiCulture="en-US" href="javascript:void(0);"><img src="~/content/img/blank.gif" class="flag flag-us" alt="United States"> English (US)</a>
+                </li>
+                <li class="@(currentCulture.Name.ToLower().Equals("Da-DK".ToLower()) ? "active" : "")">
+                    <a class="aLanguage" data-culture="da-DK" data-uiCulture="da-DK" href="javascript:void(0);"><img src="~/content/img/blank.gif" class="flag flag-dk" alt="Danmark">Dansk</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+}
+
+<!-- end multiple lang -->
+<script src="~/Scripts/CRM/General/ChangeLanguage.js"></script>

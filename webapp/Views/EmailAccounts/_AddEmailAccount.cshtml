@@ -1,0 +1,69 @@
+﻿@model CRM.Application.Core.ViewModels.EmailAccountViewModel
+<form id="addEmailAccountForm" class="smart-form">
+    @Html.HiddenFor(acc => acc.Id, new { @id = "emailAccountId", @class = "RetainOnReset" })
+    <fieldset>
+        <h2>@CRM.Application.Core.Resources.General.General.Add @CRM.Application.Core.Resources.Email.Email.EmailAccount</h2>
+        <div class="row">
+            <section class="col col-2">
+                <label for="HostName" class="input">
+                    @(CRM.Application.Core.Resources.Email.Email.HostName + "*")
+                    @Html.TextBoxFor(acc => acc.HostName)
+                    @Html.ValidationMessageFor(acc => acc.HostName, null, new { @class = "invalid validation" })
+                </label>
+            </section>
+            <section class="col col-2">
+                <label for="hostport " class="input">
+                    @CRM.Application.Core.Resources.Email.Email.HostPort
+                    <select class="form-control" id="ProtocolSelect" placeholder="*">
+                        @foreach (var po in Model.ProtocolOptions)
+                        {
+                            <option Port="@po.Port" Protocol="@po.Name">@po.Name</option>
+                        }
+                    </select>
+                    @*@Html.TextBoxFor(acc => acc.HostPort, new { @class = "RetainOnReset" })*@
+                </label>
+                @*@Html.ValidationMessageFor(acc => acc.HostPort, null, new { @class = "invalid validation"})*@
+            </section>
+        </div>
+        <div class="row">
+            <section class="col col-2">
+                <label for="username" class="input">
+                    @(CRM.Application.Core.Resources.Email.Email.UserName + "*")
+                    @Html.TextBoxFor(acc => acc.UserName)
+                    @Html.ValidationMessageFor(acc => acc.UserName, null, new { @class = "invalid validation" })
+                </label>
+            </section>
+            <section class="col col-2">
+                <label for="password" class="input">
+                    @(CRM.Application.Core.Resources.General.General.Password + "*")
+                    @(Model.Id == 0 ? Html.PasswordFor(acc => acc.PassWord, new { @class = "form-control" }) : Html.TextBoxFor(acc => acc.PassWord, new { @class = "form-control" }))
+                    @Html.ValidationMessageFor(acc => acc.PassWord, null, new { @class = "invalid validation" })
+                </label>
+                @Html.CheckBox("showPass", false, new { @Value = "Show Password"})  @CRM.Application.Core.Resources.General.General.PasswordShow
+            </section>
+        </div>
+        <div class="row">
+            <section class="col col-2">
+                <label for="fulladdress" class="input">
+                    @(CRM.Application.Core.Resources.Email.Email.EmailAddress + "*")
+                        @Html.TextBoxFor(acc => acc.FullAddress)
+                    @Html.ValidationMessageFor(acc => acc.FullAddress, null, new { @class = "invalid validation" })
+                </label>
+            </section>
+        </div>
+    </fieldset>
+    <footer>
+        @if (Model.Id == 0)
+        {
+            <button type="submit" id="btnSaveEmailAccount" class="btn btn-primary">
+                @CRM.Application.Core.Resources.General.General.Save
+            </button>
+        }
+        else
+        {
+            <button type="submit" id="btnUpdateEmailAccount" class="btn btn-primary">
+                @CRM.Application.Core.Resources.General.General.Update
+            </button>
+        }
+    </footer>
+</form>

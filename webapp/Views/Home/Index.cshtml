@@ -1,0 +1,94 @@
+﻿@using Microsoft.AspNet.Identity
+@model CRM.Application.Core.ViewModels.DashboardListsViewModel
+<!-- MAIN CONTENT -->
+
+
+@if (!User.IsInRole("Admin"))
+{
+    <div id="content">
+
+
+        <div class="row">
+            @if (AuthorizationService.AuthorizeRenderHTML("Index", "DashboardLists"))
+            {
+                <div class="col-xs-12 col-sm-7 col-md-7 col-lg-4">
+                    <h1 class="page-title txt-color-blueDark"><i class="fa-fw fa fa-home"></i> @CRM.Application.Core.Resources.General.General.Dashboard <span>> @CRM.Application.Core.Resources.Administration.DashboardLists.MyDashBoard</span></h1>
+                </div>
+                <div class="col-md-offset-4 col-lg-offset-4 col-xs-12 col-sm-5 col-md-1 col-lg-4">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="javascript:void(0);">@CRM.Application.Core.Resources.Administration.DashboardLists.DashBoardLists</a>
+                        <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);"><span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            @foreach (var dashboardList in Model.DashboardLists)
+                            {
+                                <li>
+                                    <a class="dashboardListsMenu" href="javascript:void(0);" id="@dashboardList.Id">@dashboardList.Name</a>
+                                </li>
+                            }
+
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+        <!-- MAIN CONTENT -->
+        <div id="content">
+            <!-- widget grid -->
+            <section id="widget-grid" class="">
+                <!-- START ROW -->
+                <div class="row">
+
+                <div class="widgetsDiv">
+
+                    @if (AuthorizationService.AuthorizeRenderHTML("TimeRegWidget", "Home"))
+                    {
+                            @Html.Action("TimeRegWidget", "Home")
+                    }
+                </div>
+
+                </div>
+                    <div class="row">
+                        <!-- NEW COL START -->
+                        <!-- END COL -->
+                        <!-- NEW COL START -->
+                        <div id="widgetsDiv">
+                            @if (AuthorizationService.AuthorizeRenderHTML("Index", "DashboardLists"))
+                            {
+                                @Html.Action("Widget", "Home")
+                            }
+                        </div>
+                        <!-- END COL -->
+
+
+                    </div>
+
+                    <!-- END ROW -->
+
+            </section>
+
+            <!-- widget grid -->
+            <section id="widget-grid" class="">
+                <!-- START ROW -->
+                <div class="row">
+                    <!-- NEW COL START -->
+                    <div id="barChartDiv">
+                        @*@{Html.RenderAction("BudgetBarchartWidget", "Home");}*@
+                    </div>
+                    <!-- END COL -->
+                    <!-- NEW COL START -->
+                    <!-- END COL -->
+                </div>
+                <!-- END ROW -->
+            </section>
+        </div>
+        <!-- END MAIN CONTENT -->
+
+
+
+    </div>
+
+
+
+
+}
+<!-- END MAIN CONTENT -->

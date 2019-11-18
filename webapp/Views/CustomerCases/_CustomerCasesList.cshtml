@@ -1,0 +1,132 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using CRM.Application.Core.Resources.DrivingRegistrations
+@model CRM.Application.Core.ViewModels.CustomerCaseDatatableViewModel
+@{
+    Layout = null;
+}
+
+@Html.HiddenFor(x => x.DefaultOrderBy, new { @id = "hiddenDefaultOrderBy" })
+@Html.HiddenFor(x => x.OrderBy, new { @id = "hiddenOrderBy" })
+@Html.HiddenFor(x => x.Direction, new { @id = "hiddenDirection" })
+@Html.HiddenFor(x => x.PageNumber, new { @id = "hiddenPageNumber" })
+
+@foreach (var t in Model.CustomerCases)
+{
+    <tr caseId=@t.Id id="@t.Id-case" role="row" class="even expandCollapseDetails">
+        <td class="@(t.Pinned?"fa fa-thumb-tack blue" : "fa fa-thumb-tack black")" style="display:block"></td>
+        <td class="sorting_1">@t.Titel</td>
+        <td>
+            <div id="@t.Id-progressbar" class="progress progress-xs" data-progressbar-value="@t.PercentDone">
+                <div class="progress-bar"></div>
+            </div>
+        </td>
+        <td>
+            @(string.Format("{0} {1}", t.User.FirstName, t.User.LastName))
+        </td>
+        <td>
+            @{
+                switch ((int)t.Status)
+                {
+                    case 0:
+                        <span class='label label-danger'>@CustomerCase.NotPlanned</span>
+                        break;
+                    case 1:
+                        <span class='label label-primary'>@CustomerCase.Igang</span>
+                        break;
+                    case 2:
+                        <span class='label label-success'>@CustomerCase.Afsluttet</span>
+                        break;
+                    case 3:
+                        <span class='label label-default'>@CustomerCase.Afventer</span>
+                        break;
+                    case 4:
+                        <span class='label label-default'>@CustomerCase.AfventerKunde</span>
+                        break;
+                    case 5:
+                        <span class='label label-default'>@CustomerCase.Afventer3part</span>
+                        break;
+                    case 6:
+                        <span class='label label-warning'>@CustomerCase.Pause</span>
+                        break;
+
+                }
+            }
+            @*@if (t.Done == false)
+                    {
+                        <span class="label label-success">@Customer.ACTIVE</span>
+                    }
+                    else
+                    {
+                <span class="label label-default">@Customer.DONE</span>
+                    }*@
+        </td>
+        <td><span id="@t.Id-TotalTimeUsed">@((t.TotalTimeUsed.TotalMinutes / 60).ToString("00")):@((t.TotalTimeUsed.TotalMinutes % 60).ToString("00")) </span>/ (<span id="@t.Id-EstimatedTimeSpan">@t.EstimatedTimeSpan.ToString("hh':'mm")</span>)</td>
+        <td>@(t.StartDateTime != null ? @t.StartDateTime.Value.ToString("dd/MM/yyyy") : "")</td>
+        <td><strong>@(t.Deadline != null ? @t.Deadline.Value.ToString("dd/MM/yyyy") : "")</strong></td>
+        <td data-id="@t.Id" class="details-control mainTable"></td>
+
+    <tr id="@t.Id" style="display: none">
+        <td colspan="9">
+            <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                <tbody>
+                    <tr>
+                        <td>@Customer.Casenumber:</td>
+                        <td style="max-width:150px; word-wrap:break-word" id="@t.Id-CaseId"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>@Customer.Contact:</td>
+                        <td style="max-width: 150px; word-wrap: break-word" id="@t.Id-contact"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>@Customer.Started:</td>
+                        <td id="@t.Id-startDate"></td>
+                        <td></td>
+                    </tr>
+                    @if (t.Done)
+                    {
+                        <tr>
+                            <td>@Customer.Ended:</td>
+                            <td id="@t.Id-endDate"></td>
+                            <td></td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>@Customer.Description:</td>
+                        <td style="max-width: 150px; word-wrap: break-word" id="@t.Id-description">This is a blank comments area, used to add comments and keep notes</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align:middle">@Customer.ESTDoneLong:</td>
+                        <td style="vertical-align:middle">
+                            <div class="listSlider" style="margin-top: 5px; margin-bottom: 5px;" data-sliderVal="@t.PercentDone" id="listSlider_@t.Id">
+
+                            </div>
+                        </td>
+                        <td style="vertical-align:middle"><button id="estimatedSliderBtn" data-case-id="@t.Id" class="btn btn-xs btn-info pull-right">@Customer.Save</button></td>
+                    </tr>
+                    <tr>
+                        <td>@Customer.Actions:</td>
+                        <td id="@t.Id-actions">
+                                <button id="@t.Id-editBtn" data-case-id="@t.Id" data-customer-id="@t.CustomerId" class="btn btn-xs editBtn btn-info pull-left">@Customer.Edit</button>
+                                @if (t.Done)
+                                {
+                                    <button id="@t.Id-restartBtn" data-case-id="@t.Id" class="btn btn-xs restartBtn btn-warning pull-left">@Customer.Restart</button>
+                                }
+                                else
+                                {
+                                    <button id="@t.Id-endBtn" data-case-id="@t.Id" class="btn btn-xs endBtn btn-warning pull-left">@Customer.End</button>
+                                }
+                                <button id="drivingRegBtn-@t.Id" data-case-id="@t.Id" class="drivingRegBtn btn btn-xs btn-default pull-right">@DrivingReg.DrivingRegistration</button>
+                                <button id="timeRegBtn-@t.Id" data-case-id="@t.Id" class="timeRegBtn btn btn-xs btn-info pull-right">@Customer.TimeRegistration</button>
+                                <button id="assignmentsBtn" data-case-id=@t.Id class="btn btn-xs assignmentsBtn btn-success pull-right">@Customer.Assignments</button>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+    </tr>
+}

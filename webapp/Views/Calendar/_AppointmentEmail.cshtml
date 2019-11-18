@@ -1,0 +1,48 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerAppointmentViewModel
+
+<form id="appointmentEmailForm">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="tags">@CRM.Application.Core.Resources.Customers.Customer.CustomersEmail</label>
+                <input class="form-control" id="appointmentCustomersMail" />
+            </div>
+            <div class="form-group">
+                <label for="tags">@CRM.Application.Core.Resources.Customers.Customer.SalesPersonEmail</label>
+                <input class="form-control" id="appointmentSalesPersonMail" />
+            </div>
+            <div class="form-group">
+                <div id="resendEmailDiv" style="display:none"><input id="resendEmail" type="checkbox" /><cite title="">@CRM.Application.Core.Resources.Email.Email.ResendEmails</cite></div>
+            </div>
+            <div class="form-group">
+                <label for="tags">@CRM.Application.Core.Resources.Customers.Customer.Note </label>
+                <textarea class="form-control" placeholder="" rows="5" id="appointmentNote"></textarea>
+            </div>
+            @if (CRM.Application.Core.Services.AuthorizationService.AuthorizeRenderHTML("CustomerNoteOptions", "Customers"))
+            {
+                <div class="form-group">
+                    <div id="saveAppointmentNoteDiv">
+                        <input id="saveAppointmentNote" class="" type="checkbox" /><cite title="">@CRM.Application.Core.Resources.Customers.Customer.SaveNoteOnCustomer</cite>
+                    </div>
+                    <div id="noteOptions" class="form-group" style="display:none">
+                        <label class="select">
+                            @Html.DropDownListFor(x => x.CustomerNotesReportId, new SelectList(Model.CustomerNotesReportList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.Report, new { @class = "form-control", @Id = "customerNotesReportId" })
+                            <span id="customerNotesReportIdValidation" style="display:none" class="field-validation-valid invalid validation">@CRM.Application.Core.Resources.General.General.Required</span>
+                            <i></i>
+                        </label>
+                        <label class="select">
+                            @Html.DropDownListFor(x => x.CustomerNotesVisitTypeId, new SelectList(Model.CustomerNotesVisitTypeList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.Type, new { @class = "form-control", @Id = "customerNotesVisitTypeId" })
+                            <span id="customerNotesVisitTypeIdValidation" style="display:none" class="field-validation-valid invalid validation">@CRM.Application.Core.Resources.General.General.Required</span>
+                            <i></i>
+                        </label>
+                        <label class="select">
+                            @Html.DropDownListFor(x => x.CustomerNotesDemoId, new SelectList(Model.CustomerNotesDemoList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.Demo, new { @class = "form-control", @Id = "customerNotesDemoId" })
+                            <span id="customerNotesDemoIdValidation" style="display:none" class="field-validation-valid invalid validation">@CRM.Application.Core.Resources.General.General.Required</span>
+                            <i></i>
+                        </label>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</form>

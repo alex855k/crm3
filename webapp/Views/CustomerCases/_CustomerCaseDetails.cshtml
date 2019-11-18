@@ -1,0 +1,69 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@model CRM.Application.Core.ViewModels.CustomerCaseDatatableViewModel
+@{
+    Layout = null;
+}
+
+<tr id="@t.Id" style="display: none">
+    <td colspan="9">
+        <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+            <tbody>
+                <tr>
+                    <td>@Customer.Casenumber:</td>
+                    <td style="max-width:150px; word-wrap:break-word" id="@t.Id-CaseId"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>@Customer.Contact:</td>
+                    <td style="max-width: 150px; word-wrap: break-word" id="@t.Id-contact"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    //endedrow
+                    <td>@Customer.Started:</td>
+                    <td id="@t.Id-startDate"></td>
+                    <td></td>
+                </tr>
+                @if (t.Done)
+                {
+                    <tr>
+                        <td>@Customer.Ended:</td>
+                        <td id="@t.Id-endDate"></td>
+                        <td></td>
+                    </tr>
+                }
+                <tr>
+                    <td>@Customer.Description:</td>
+                    <td style="max-width: 150px; word-wrap: break-word" id="@t.Id-description">This is a blank comments area, used to add comments and keep notes</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align:middle">@Customer.ESTDoneLong:</td>
+                    <td style="vertical-align:middle">
+                        <div class="listSlider" style="margin-top: 5px; margin-bottom: 5px;" data-sliderVal="@t.PercentDone" id="listSlider_@t.Id">
+
+                        </div>
+                    </td>
+                    <td style="vertical-align:middle"><button id="estimatedSliderBtn" data-case-id="@t.Id" class="btn btn-xs btn-info pull-right">@Customer.Save</button></td>
+                </tr>
+                <tr>
+                    <td>@Customer.Actions:</td>
+                    <td id="@t.Id-actions">
+                        <button id="@t.Id-editBtn" data-case-id="@t.Id" class="btn btn-xs editBtn btn-info pull-left">@Customer.Edit</button>
+                        @if (t.Done)
+                        {
+                            <button id="@t.Id-restartBtn" data-case-id="@t.Id" class="btn btn-xs restartBtn btn-warning pull-left">@Customer.Restart</button>
+                        }
+                        else
+                        {
+                            <button id="@t.Id-endBtn" data-case-id="@t.Id" class="btn btn-xs endBtn btn-warning pull-left">@Customer.End</button>
+                        }
+                        <button id="timeRegBtn-@t.Id" data-case-id="@t.Id" class="timeRegBtn btn btn-xs btn-info pull-right">@Customer.TimeRegistration</button>
+                        <button id="assignmentsBtn" data-case-id=@t.Id class="btn btn-xs assignmentsBtn btn-success pull-right">@Customer.Assignments</button>
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </td>
+</tr>

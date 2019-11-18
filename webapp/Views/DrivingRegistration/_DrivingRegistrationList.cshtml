@@ -1,0 +1,330 @@
+﻿@using CRM.Application.Core.Resources.Customers
+@using Microsoft.AspNet.Identity
+@using CRM.Application.Core.Resources.DrivingRegistrations
+@{
+    Layout = null;
+}
+<input type="hidden" id="hiddenUserId" name="hiddenUserId" value="@User.Identity.GetUserId()">
+
+<table id="DrivingRegTable" class="projects-table table table-striped table-bordered table-hover dataTable no-footer" cellspacing="0" width="100%" role="grid" aria-describedby="example_info" style="width: 100%;">
+    <thead>
+        <tr style="width: 100%">
+
+            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@DrivingReg.StartMileage </th>
+            <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1">@DrivingReg.EndMileage </th>
+            
+            <th rowspan="1" colspan="1"><button data-caseId="" id="DrivingRegTableReload" class="btn btn-xs btn-danger"><i class="fa fa-refresh"></i></button></th>
+        </tr>
+    </thead>
+    <tbody id="DrivingRegTBody"></tbody>
+</table>
+<script src="~/Scripts/moment/moment-duration-format.js"></script>
+<link href="~/Scripts/plugin/datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<script src="~/Scripts/plugin/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/plugin/locale/da.js"></script>
+<script type="text/javascript">
+
+    $(document).off("click", ".DrivingReg");
+    $(document).on("click", ".DrivingReg", function() {
+        const tr = $(this).parent()[0];
+        const id = $(tr).attr("data-caseid");
+        $(tr).toggleClass("shown");
+        if ($(tr).hasClass("shown")) {
+            $(`#DrivingReg${id}`).show();
+        } else {
+            $(`#DrivingReg${id}`).hide();
+        }
+    });
+
+    function clearDrivingRegList() {
+        $("#DrivingRegTBody").empty();
+    }
+    //Makes it so a user can edit a DrivingReg
+    $(document).off("click", ".editDrivingRegBtn");
+    $(document).on("click", ".editDrivingRegBtn", function () {
+        var DrivingRegId = parseInt($(this).attr("data-DrivingReg-id"));
+        var $el = $(`[data-editable-${DrivingRegId}]`);
+        $(this).replaceWith(
+            `<button id="${DrivingRegId}-saveDrivingRegBtn" style="margin-right: 10px" data-DrivingReg-id="${DrivingRegId
+            }" class="btn btn-xs editSaveDrivingRegBtn btn-success pull-left">@DrivingReg.Save</button>
+                <button id="${DrivingRegId}-cancelDrivingRegBtn" data-DrivingReg-id="${DrivingRegId}" style="margin-right: 10px" class="btn btn-xs cancelDrivingRegBtn btn-normal pull-left">@DrivingReg.Cancel</button>`);
+        $.each($el,
+            function (i, item) {
+                const $width = $($el[i]).width();
+                const $id = $($el[i]).prop("id");
+                if ($id === `${DrivingRegId}-assignment`) {
+                    $(item).attr(`data-saveable-${DrivingRegId}`, "");
+                    $(item).removeAttr(`data-editable-${DrivingRegId}`);
+                    const content = $("#DrivingRegAssignment").clone();
+                    $(`#${DrivingRegId}-assignment`).empty();
+                    $(`#${DrivingRegId}-assignment`).append(content);
+                } else {
+                    const $td = $(`<td style='width: ${$width}px'> </td>`);
+                    const $input =
+                        $(`<input class="form-control datepicker" id="${$id}" data-saveable-${DrivingRegId} style="width:${$width
+                            }px"/>`).val($(item).text());
+
+                    $($td).append($input);
+                    $(item).replaceWith($td);
+                }
+            });
+        $(`#DrivingRegDateTime-start-${DrivingRegId}`).datetimepicker({
+            locale: "@DrivingReg.locale",
+            sideBySide: true
+        });
+
+        $(`#DrivingRegDateTime-end-${DrivingRegId}`).datetimepicker({
+            locale: "@DrivingReg.locale",
+            sideBySide: true,
+        });
+
+        $(`#DrivingRegDateTime-end-${DrivingRegId}`).on("dp.change",
+            function (e) {
+
+                $(`#DrivingRegDateTime-start-${DrivingRegId}`).data("DateTimePicker").maxDate(e.date);
+                const timeStart = $(`#DrivingRegDateTime-start-${DrivingRegId}`).data("DateTimePicker").date()
+                    .toISOString();
+                const timeEnd = $(`#DrivingRegDateTime-end-${DrivingRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${DrivingRegId}-distance`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@DrivingReg.shortHour}]:mm[@{@DrivingReg.shortMin}]"));
+            });
+
+        $(`#DrivingRegDateTime-start-${DrivingRegId}`).on("dp.change",
+            function(e) {
+                $(`#DrivingRegDateTime-end-${DrivingRegId}`).data("DateTimePicker").minDate(e.date);
+                const timeStart = $(`#DrivingRegDateTime-start-${DrivingRegId}`).data("DateTimePicker").date()
+                    ;
+                const timeEnd = $(`#DrivingRegDateTime-end-${DrivingRegId}`).data("DateTimePicker").date().toISOString();
+                $(`#${DrivingRegId}-distance`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@DrivingReg.shortHour}]:mm[@{@DrivingReg.shortMin}]"));
+            });
+    });
+
+
+    // Deletes a DrivingReg
+    $(document).off("click", ".deleteDrivingRegBtn");
+    $(document).on("click", ".deleteDrivingRegBtn",
+        function() {
+            var DrivingRegId = parseInt($(this).attr("data-DrivingReg-id"));
+            var caseId = $("#DrivingRegModal").attr("data-caseId");
+            var oldTimeEstimate = moment.duration($(`#${caseId}-TotalTimeUsed`).text());
+            $.SmartMessageBox({
+                    title: "@DrivingReg.Delete?",
+                    content: "@DrivingReg.RUSure @DrivingReg.DrivingRegistration?",
+                    buttons: "[@DrivingReg.No][@DrivingReg.Yes]"
+                },
+                function(ButtonPressed) {
+                    if (ButtonPressed === "@DrivingReg.Yes") {
+
+                        $.ajax({
+                            url: "/DrivingRegistration/DeleteDrivingReg",
+                            data: { DrivingRegId: DrivingRegId },
+                            success: function(data) {
+                                $(`.DrivingRegRemove${DrivingRegId}`).fadeOut(300, function() { $(this).remove(); });
+
+                                const newTimeEstimate =
+                                    oldTimeEstimate.subtract(moment.duration($(`#${DrivingRegId}-distance`).text()));
+                                $(`#${caseId}-TotalTimeUsed`)
+                                    .text(`${moment.duration(newTimeEstimate).format("hh[@{@DrivingReg.shortHour}]:mm[@{@DrivingReg.shortMin}]", { trim: false })}`);
+                            },
+                            error: function(data) {
+                                toastr.error("Delete failed");
+
+                            }
+                        });
+                    }
+                    if (ButtonPressed === "@DrivingReg.No") {
+                        $.smallBox({
+                            iconSmall: "fa fa-times fa-2x fadeInRight animated",
+                            timeout: 4000
+                        });
+                    }
+                }
+            );
+
+        });
+
+    $(document).off("click", "#DrivingRegTableReload");
+    $(document).on("click",
+        "#DrivingRegTableReload",
+        function() {
+            getDrivingRegtable($("#hiddenUserId").val());
+        });
+
+    $(document).ready(function() {
+
+        getDrivingRegtable($("#hiddenUserId").val());
+
+    });
+
+    function getDrivingRegtable(userId) {
+        $("#DrivingRegTBody").empty();
+        $.ajax({
+            url: "/DrivingRegistration/GetCaseDrivingRegs",
+            data: { 'UserId': userId, 'dateTime': $("#dailyReportDate").attr("data-date") },
+            dataType: "json",
+            success: function(data) {
+                insertDrivingRegToTable(data);
+            },
+            error: function() {
+                toastr.error("Could not fetch Time Registration");
+            }
+
+        });
+    }
+    
+    function insertDrivingRegToTable(data) {
+        $.each(data.DrivingRegsList,
+            function (i, item) {
+                var endDate = "-";
+                if (item.EndDateTime != null) {
+                    endDate = moment(new Date(parseInt((item.EndDateTime).replace(/\/Date\((-?\d+)\)\//, "$1"))))
+                        .format("DD.MM.YYYY HH:mm");
+                }
+                var caseDrivingRegString ="";
+                var assignmentString="";
+
+                if (item.CustomerCase != null) {
+                    caseDrivingRegString = `<tr>
+                                                <td>@Customer.CaseTitle:</td><td style="max-width:150px; word-wrap:break-word" id="DrivingRegCaseTitle-${
+                        item.Id}" data-editable-${item.Id}>${item.CustomerCase.Titel}</td>
+                                            </tr>`;
+                }
+                if (item.CaseAssignment != null) {
+                    assignmentString = `<tr>
+                                                <td>@Customer.Assignment @Customer.Title:</td><td style="max-width:150px; word-wrap:break-word" id="DrivingRegAssigment-${
+                        item.Id}" data-editable-${item.Id}>${item.CaseAssignment.Title}</td>
+                                            </tr>`;
+                }
+
+                $("#DrivingRegTable").append(
+                    `<tr data-caseid="${item.Id}" @*role="row"*@ class="DrivingRegRemove${item.Id} even expandCollapseDetails">
+                                <td id="DrivingRegDateTime-start-${item.Id}" data-editable-${item.Id}>${moment(
+                        new Date(parseInt((item.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")))).format("DD.MM.YYYY HH:mm")}</td>
+                                <td id="DrivingRegDateTime-end-${item.Id}" data-editable-${item.Id}>${endDate}</td>
+                                <td id="${item.Id}-distance">${moment.duration(item.distance).format("H[@{@DrivingReg.shortHour}]:mm[@{@DrivingReg.shortMin}]", { trim: false })}</td>
+                                <td style="width: 15px" class="details-control DrivingReg"></td>
+
+                                <tr class="DrivingReg DrivingRegRemove${item.Id}" id="DrivingReg${item.Id}" style="display: none"><td colspan="6">
+                                    <table cellpadding="5" cellspacing="0" border="0" class="table table-hover table-condensed">
+                                        <tbody>
+                                    ${caseDrivingRegString}
+                                    ${assignmentString}
+                                            <tr>
+                                                <td>@DrivingReg.Description:</td><td style="max-width:150px; word-wrap:break-word" id="DrivingRegDescription-${item.Id}" data-editable-${item.Id}>${item.Description}</td>
+                                            </tr>
+                                            <tr>
+                                                <td id="${item.Id}-actions">
+                                                    <button id="${item.Id}-editDrivingRegBtn" style="margin-right: 10px" data-DrivingReg-id="${item.Id}" class="btn btn-xs editDrivingRegBtn btn-info pull-left">@DrivingReg.Edit</button>
+                                                    <button id="${item.Id}-DeleteBtn" data-DrivingReg-id="${item.Id}" class="btn btn-xs deleteDrivingRegBtn btn-danger pull-left">@DrivingReg.Delete</button>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    </td>
+                                </tr>
+                            </tr>`);
+            });
+    }
+
+    //returns the DrivingReg to normal
+        $(document).off("click", ".cancelDrivingRegBtn");
+        $(document).on("click", ".cancelDrivingRegBtn",
+            function() {
+                var DrivingRegId = parseInt($(this).attr("data-DrivingReg-id"));
+                var $el = $(`[data-saveable-${DrivingRegId}]`);
+                $(this).replaceWith(
+                    `<button id="${DrivingRegId}-editDrivingRegBtn" data-DrivingReg-id="${DrivingRegId
+                    }" class="btn btn-xs editDrivingRegBtn btn-info pull-left">@DrivingReg.Edit</button> `);
+                $(`#${DrivingRegId}-saveDrivingRegBtn`).remove();
+
+                $.each($el,
+                    function(i, item) {
+                        const $id = $($el[i]).prop("id");
+                        if ($id === `${DrivingRegId}-assignment`) {
+                            const selected = $(item).children().find(":selected").text();
+                            $(`#${DrivingRegId}-assignment`).empty();
+                            $(`#${DrivingRegId}-assignment`).append(selected);
+                            $(item).attr(`data-editable-${DrivingRegId}`, "");
+                            $(item).removeAttr(`data-saveable-${DrivingRegId}`);
+
+                        } else {
+
+                            const $td = $(`<td data-editable-${DrivingRegId} id=${$id}>${$(item).val()} </td>`);
+
+                            $(item).parent().replaceWith($td);
+                        }
+
+                    });
+                $.ajax({
+                    url: "/DrivingRegistration/GetDrivingReg",
+                    type: "Get",
+                    data: { "DrivingRegId": DrivingRegId },
+                    success: function (data) {
+                        const selectedDate = new Date(parseInt((data.DrivingReg.StartDateTime).replace(/\/Date\((-?\d+)\)\//, "$1")));
+                        $(`#DrivingRegDateTime-start-${DrivingRegId}`).text(
+                            moment(timeStart)
+                            .format("DD.MM.YYYY HH:mm"));
+
+                        $(`#${DrivingRegId}-distance`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@DrivingReg.shortHour}]:mm[@{@DrivingReg.shortMin}]"));
+
+          
+                        $(`#DrivingRegDescription-${DrivingRegId}`).text(data.Description);
+                    },
+                    error: function(data) {
+                        toastr.error("Error");
+                    }
+                });
+            });
+
+        //Saves the edited DrivingReg
+        $(document).off("click", ".editSaveDrivingRegBtn");
+        $(document).on("click", ".editSaveDrivingRegBtn",
+            function() {
+                var DrivingRegId = parseInt($(this).attr("data-DrivingReg-id"));
+                var $el = $(`[data-saveable-${DrivingRegId}]`);
+                $(this).replaceWith(`<button id="${DrivingRegId}-editDrivingRegBtn" data-DrivingReg-id="${DrivingRegId
+                    }" class="btn btn-xs editDrivingRegBtn btn-info pull-left">@DrivingReg.Edit</button> `);
+                $(`#${DrivingRegId}-cancelDrivingRegBtn`).remove();
+
+                const timeStart = $(`#DrivingRegDateTime-start-${DrivingRegId}`).data("DateTimePicker").date().toISOString();
+                const timeEnd = $(`#DrivingRegDateTime-end-${DrivingRegId}`).data("DateTimePicker").date().toISOString();
+                const assignmentId = $(`#${DrivingRegId}-assignment`).children().find(":selected").val();
+                $(`#${DrivingRegId}-distance`).text(moment.duration(moment(timeEnd).diff(moment(timeStart))).format("H[@{@DrivingReg.shortHour}]:mm[@{@DrivingReg.shortMin}]"));
+                $.each($el,
+                    function(i, item) {
+                        const $id = $($el[i]).prop("id");
+                        if ($id === `${DrivingRegId}-assignment`) {
+                            const selected = $(item).children().find(":selected").text();
+                            $(`#${DrivingRegId}-assignment`).empty();
+                            $(`#${DrivingRegId}-assignment`).append(selected);
+                            $(item).attr(`data-editable-${DrivingRegId}`, "");
+                            $(item).removeAttr(`data-saveable-${DrivingRegId}`);
+                        } else {
+                            const $td = $(`<td data-editable-${DrivingRegId} id=${$id}>${$(item).val()} </td>`);
+
+                            $(item).parent().replaceWith($td);
+                        }
+                    });
+
+                const DrivingReg = {
+                    "Id": DrivingRegId,
+                    "Description": $(`#DrivingRegDescription-${DrivingRegId}`).text(),
+                    "StartDateTime": timeStart,
+                    "EndDateTime": timeEnd,
+                };
+                $.ajax({
+                    url: "/DrivingRegistration/DrivingRegEdit",
+                    type: "Post",
+                    data: { "DrivingReg": DrivingReg },
+                    success: function(data) {
+                        toastr.success("@DrivingReg.Saved");
+                    },
+                    error: function(data) {
+                        toastr.error("Edit failed");
+
+                    }
+                });
+
+            });
+
+</script>

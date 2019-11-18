@@ -1,0 +1,228 @@
+﻿@model CRM.Application.Core.ViewModels.CustomerViewModel
+
+<form id="createCustomerForm" class="smart-form">
+    @Html.HiddenFor(x => x.Id, new { @id = "customerId" })
+    @Html.HiddenFor(x => x.PageNumber, new { @id = "hiddenPageNumber" })
+    @Html.Hidden("isCustomersEditPage", true, new { @id = "hiddenIsCustomersEditPage" })
+    @Html.HiddenFor(x => x.HiddenCustomerRowColor, new { @id = "hiddenCustomerRowColor" })
+    <fieldset>
+        <div class="row">
+            <section class="col col-6">
+                <label class="input">
+                    <i class="icon-prepend fa fa-user"></i>
+                    @Html.TextBoxFor(x => x.CompanyName, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.CompanyName })
+                </label>
+                @*Html.ValidationMessageFor(x => x.CompanyName, null, new { @class = "invalid validation" })*@
+            </section>
+            <section class="col col-6">
+                <label class="select">
+                    @Html.DropDownListFor(x => x.CustomerTypeId, new SelectList(Model.CustomerTypesList, "Id", "Name"), CRM.Application.Core.Resources.Customers.Customer.CustomerType)
+                    <i></i>
+
+                </label>
+            </section>
+        </div>
+
+        <div class="row">
+            <section class="col col-4">
+                <label class="input">
+                    <i id="customerCvrBtn" class="icon-prepend fa ">cvr</i>
+                    @Html.TextBoxFor(x => x.CVR, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.CVR, @id = "customerCvr" })
+                </label>
+            </section>
+
+            <section class="col col-4">
+                <label class="input">
+                    <i class="icon-prepend fa fa-user"></i>
+                    @Html.TextBoxFor(x => x.EAN, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.EAN })
+                </label>
+            </section>
+
+            <section class="col col-4">
+                <label class="input">
+                    <i class="icon-prepend fa fa-user"></i>
+                    @Html.TextBoxFor(x => x.DELEAN, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.DELEAN })
+                </label>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col col-4">
+                <label class="input">
+                    <i class="icon-prepend fa fa-envelope-o" id="customerEmailButton"></i>
+                    @Html.TextBoxFor(x => x.Email, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Email, id = "customerEmail" })
+                    <i></i>
+                </label>
+                @Html.ValidationMessageFor(x => x.Email, null, new { @class = "invalid validation" })
+            </section>
+            <section class="col col-4">
+                <label class="input">
+                    <i id="customerUrlBtn" class="icon-prepend fa fa-link"></i>
+                    @Html.TextBoxFor(x => x.CompanyURL, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.CompanyURL, @id = "customerUrl" })
+                    <i></i>
+                </label>
+                @Html.ValidationMessageFor(x => x.CompanyURL, null, new { @class = "invalid validation" })
+            </section>
+            <section class="col col-4">
+                <label class="input">
+                    <i id="customerPhoneBtn" class="icon-prepend fa fa-phone"></i>
+                    @Html.TextBoxFor(x => x.Phone, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Phone, @id = "customerPhone" })
+                </label>
+            </section>
+        </div>
+    </fieldset>
+    <fieldset>
+        <div class="row">
+            <section class="col col-4">
+                <label for="address" class="input">
+                    <i class="icon-prepend  fa fa-globe" id="customerAddressBtn"></i>
+                    @Html.TextBoxFor(x => x.Address, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Address, @id = "customerAddress" })
+                </label>
+            </section>
+            <section class="col col-4">
+                <label for="town" class="input">
+                    @Html.TextBoxFor(x => x.Town, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Town })
+                </label>
+            </section>
+            <section class="col col-4">
+                <label for="country" class="input">
+                    @Html.TextBoxFor(x => x.Country, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.Country })
+                </label>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col col-6">
+                <label for="postalCode" class="input">
+                    <i id="customerPostalBtn" class="icon-prepend fa ">P</i>
+                    @Html.TextBoxFor(x => x.PostalCode, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.PostalCode, @id = "customerPostalCode" })
+                </label>
+            </section>
+
+            <section class="col col-6">
+                <label for="town" class="select">
+                    @Html.DropDownListFor(x => x.CustomerStatusId, new SelectList(Model.CustomerStatusList, "Id", "Name"), new { id = "customerStatus" })
+                    <i></i>
+                </label>
+            </section>
+        </div>
+        <div class="row">
+            <section class="col col-6">
+                <label for="town" class="select">
+                    @Html.DropDownListFor(x => x.SalesPersonId, new SelectList(Model.SalesList, "Id", "FullName"), CRM.Application.Core.Resources.Customers.Customer.AccountDirector)
+                    <i></i>
+                </label>
+            </section>
+            <section class="col col-6">
+                <div id="customerColorPicker" class="input-group colorpicker-component">
+                    @Html.TextBoxFor(x => x.CustomerRowColor, new { @text = @Model.CustomerRowColor, @readonly = "readonly", @class = "form-control", id = "customerRowColor" })
+                    <span class="input-group-addon"><i></i></span>
+                </div>
+            </section>
+        </div>
+        <section>
+            <label class="textarea">
+                @Html.TextAreaFor(x => x.AdditionalInfo, new { @placeholder = CRM.Application.Core.Resources.Customers.Customer.AdditionalInfo })
+            </label>
+        </section>
+        <div class="form-group">
+            <div class="btn-group btn-group-justified btn-select-tick" data-toggle="buttons">
+                <label class="btn lblCustomerColor bg-color-white active">
+                    <input type="radio" name="customerColor" class="customerColor" id="option" value="#ffffff" checked="">
+                    <i class="fa fa-check txt-color-black"></i>
+                </label>
+                <label class="btn lblCustomerColor bg-color-darken">
+                    <input type="radio" name="customerColor" class="customerColor" id="option1" value="#404040">
+                    <i class="fa fa-check txt-color-white"></i>
+                </label>
+                <label class="btn lblCustomerColor bg-color-blue">
+                    <input type="radio" name="customerColor" class="customerColor" id="option2" value="#57889C">
+                    <i class="fa fa-check txt-color-white"></i>
+                </label>
+                <label class="btn lblCustomerColor bg-color-orange">
+                    <input type="radio" name="customerColor" class="customerColor" id="option3" value="#C79121">
+                    <i class="fa fa-check txt-color-white"></i>
+                </label>
+                <label class="btn lblCustomerColor bg-color-greenLight">
+                    <input type="radio" name="customerColor" class="customerColor" id="option4" value="#71843F">
+                    <i class="fa fa-check txt-color-white"></i>
+                </label>
+                <label class="btn lblCustomerColor bg-color-blueLight">
+                    <input type="radio" name="customerColor" class="customerColor" id="option5" value="#92A2A8">
+                    <i class="fa fa-check txt-color-white"></i>
+                </label>
+                <label class="btn lblCustomerColor bg-color-red">
+                    <input type="radio" name="customerColor" class="customerColor" id="option6" value="#A90329">
+                    <i class="fa fa-check txt-color-white"></i>
+                </label>
+            </div>
+        </div>
+    </fieldset>
+    <footer>
+        @if (Model.Id == 0)
+        {
+
+            <button type="button" data-navigateNotes="false" class="btn btn-primary btnSaveCustomer">
+                @CRM.Application.Core.Resources.General.General.SaveAndNew
+            </button>
+            if (AuthorizationService.AuthorizeRenderHTML("CustomerNotes", "Customers"))
+            {
+                <button type="button" data-navigateNotes="true" class="btn btn-primary btnSaveCustomer">
+                    @CRM.Application.Core.Resources.Customers.Customer.SaveAndGoToNotes
+                </button>
+            }
+        }
+        else
+        {
+            if (AuthorizationService.AuthorizeRenderHTML("SetCustomerInactive", "Customers"))
+            {
+                <div class="pull-left">
+                    <button id="deleteCustomer" type="button" class="btn btn-danger" data-title="Delete Customer!"
+                            data-content="this function will move customer to recycle bin and customer will not be erased completely from the system but will not be visible for any operations"
+                            data-yes="Yes"
+                            data-no="No">
+                        @CRM.Application.Core.Resources.General.General.Delete @CRM.Application.Core.Resources.General.General.Customer
+                    </button>
+                </div>
+            }
+            <button type="submit" id="btnUpdateCustomer" class="btn btn-primary">
+                @CRM.Application.Core.Resources.General.General.Update
+            </button>
+        }
+
+    </footer>
+</form>
+
+<style>
+    .lblCustomerColor {
+        height: 16px;
+    }
+</style>
+<script>
+    $("#deleteCustomer").click(function (e) {
+        debugger;
+        var customerId = $("#customerId").val();
+        $.SmartMessageBox({
+            title: $(this).data("title"),
+            content: $(this).data("content"),
+            buttons: '[' + $(this).data("no") + '][' + $(this).data("yes") + ']'
+        }, function (ButtonPressed) {
+            if (ButtonPressed == "Yes") {
+                $.ajax({
+                    url: "/Customers/SetCustomerInactive",
+                    data: { "customerId": customerId },
+                    type: "POST",
+                    success: (data, textStatus, jqXHR) => {
+                        debugger;
+                        if (data == "1")
+                            window.location.href = "/customers?isCustomers=True"
+                        else
+                            window.location.href = "/customers?isCustomers=False"
+                    },
+                    error: (jqXHR, textStatus, errorThrown) => {
+                        toastr.error("error delete customer");
+                    }
+                });
+            }
+        });
+        e.preventDefault();
+    });
+</script>

@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNet.Identity
+@using CRM.Application.Core.Resources.TimeRegistrations
+
+@model CRM.Application.Core.ViewModels.CustomerCaseDatatableViewModel
+@{
+    Layout = null;
+}
+<div class="modal-dialog modal-xl">
+    <div class="modal-content" id="modalContent">
+        <div style="background: dodgerblue;" class="modal-header">
+            <button style="color: white" type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                &times;
+            </button>
+            <h4 class="modal-title" style="color: white" id="myModalLabel">@TimeReg.Product</h4>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                <section class="col col-md-12">
+                    <iframe style="width:100%;height:60vh;border:none;" id="productIframe" src=""></iframe>
+                </section>
+            </div>
+
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<script type="text/javascript">
+    $(document).off("click", "#productBtn");
+    $(document).on("click", "#productBtn", function () {
+
+        $("#ProductModal").modal("show");
+        loadIframe("productIframe", $("#productBtn").attr("data-url"));
+
+    });
+
+    function loadIframe(iframeName, url) {
+        var $iframe = $('#' + iframeName);
+        if ( $iframe.length ) {
+            $iframe.attr('src',url);    // here you can change src
+            return false;
+        }
+        return true;
+    }
+
+</script>
